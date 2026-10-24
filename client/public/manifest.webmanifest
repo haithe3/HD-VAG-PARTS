@@ -1,0 +1,11 @@
+{
+  "name": "HD VAG PARTS",
+  "short_name": "HD VAG PARTS",
+  "lang": "fr-DZ",
+  "dir": "ltr",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#11161C",
+  "theme_color": "#11161C",
+  "icons": [{"src":"/brand/hd-vag-parts-avatar.svg","sizes":"any","type":"image/svg+xml"}]
+}

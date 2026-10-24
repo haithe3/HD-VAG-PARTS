@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 240" role="img" aria-labelledby="title desc">
+  <title id="title">HD VAG PARTS — logo sombre</title>
+  <desc id="desc">Monogramme HD dans un hexagone ouvert, suivi du nom HD VAG PARTS.</desc>
+  <rect width="920" height="240" rx="30" fill="#11161C"/>
+  <g transform="translate(28 28)">
+    <path d="M92 3 158 41v76l-66 38-66-38V41Z" fill="none" stroke="#2D8CFF" stroke-width="10"/>
+    <path d="M92 3v34M26 41l66 38 66-38M92 79v76" fill="none" stroke="#F4F7FA" stroke-width="6" opacity=".55"/>
+    <path d="M54 104V58h15v16h20V58h15v46H89V88H69v16Zm64-46h18c16 0 25 9 25 23s-9 23-25 23h-18Zm15 12v22h4c7 0 11-3 11-11s-4-11-11-11Z" fill="#F4F7FA"/>
+    <circle cx="146" cy="31" r="7" fill="#FFB547"/>
+  </g>
+  <text x="230" y="112" fill="#F4F7FA" font-family="Space Grotesk, Arial, sans-serif" font-size="66" font-weight="700" letter-spacing="5">HD VAG</text>
+  <text x="233" y="168" fill="#2D8CFF" font-family="Plus Jakarta Sans, Arial, sans-serif" font-size="31" font-weight="800" letter-spacing="8">PARTS</text>
+  <path d="M230 192h520" stroke="#2D8CFF" stroke-width="3" opacity=".55"/>
+  <text x="768" y="168" text-anchor="end" fill="#A9B5C2" font-family="Plus Jakarta Sans, Arial, sans-serif" font-size="16" letter-spacing="2">VAG • ALGÉRIE</text>
+</svg>

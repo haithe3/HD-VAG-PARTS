@@ -1,0 +1,79 @@
+[
+  {
+    "id": "demo-filter-001",
+    "name": "Filtre à huile — PLACEHOLDER",
+    "reference": "DEMO-OF-001",
+    "category": "filters",
+    "quality": "OEM",
+    "compatible": "Golf 7 · Octavia 3 · Leon 5F",
+    "price": "Prix sur demande",
+    "image": "placeholder-filter",
+    "description": "Produit de démonstration à remplacer par votre vraie photo et référence."
+  },
+  {
+    "id": "demo-brake-001",
+    "name": "Kit plaquettes avant — PLACEHOLDER",
+    "reference": "DEMO-BR-002",
+    "category": "brakes",
+    "quality": "Aftermarket",
+    "compatible": "Polo 6 · Fabia 3 · Ibiza 6J",
+    "price": "Prix sur demande",
+    "image": "placeholder-brake",
+    "description": "Produit de démonstration à remplacer par votre vraie photo et référence."
+  },
+  {
+    "id": "demo-engine-001",
+    "name": "Courroie accessoires — PLACEHOLDER",
+    "reference": "DEMO-EN-003",
+    "category": "engine",
+    "quality": "Original",
+    "compatible": "Golf 6 · A3 8V · Octavia 3",
+    "price": "Prix sur demande",
+    "image": "placeholder-engine",
+    "description": "Produit de démonstration à remplacer par votre vraie photo et référence."
+  },
+  {
+    "id": "demo-suspension-001",
+    "name": "Amortisseur avant — PLACEHOLDER",
+    "reference": "DEMO-SU-004",
+    "category": "suspension",
+    "quality": "OEM",
+    "compatible": "A3 8P · Golf 5 · Leon 1P",
+    "price": "Prix sur demande",
+    "image": "placeholder-suspension",
+    "description": "Produit de démonstration à remplacer par votre vraie photo et référence."
+  },
+  {
+    "id": "demo-electrical-001",
+    "name": "Capteur ABS — PLACEHOLDER",
+    "reference": "DEMO-EL-005",
+    "category": "electrical",
+    "quality": "Aftermarket",
+    "compatible": "Golf 7 · Passat B8 · Superb 3",
+    "price": "Prix sur demande",
+    "image": "placeholder-electrical",
+    "description": "Produit de démonstration à remplacer par votre vraie photo et référence."
+  },
+  {
+    "id": "demo-fluids-001",
+    "name": "Huile moteur 5W30 — PLACEHOLDER",
+    "reference": "DEMO-FL-006",
+    "category": "fluids",
+    "quality": "Original",
+    "compatible": "Moteurs essence & diesel selon préconisation",
+    "price": "Prix sur demande",
+    "image": "placeholder-fluids",
+    "description": "Produit de démonstration à remplacer par votre vraie photo et référence."
+  },
+  {
+    "id": "demo-body-001",
+    "name": "Rétroviseur droit — PLACEHOLDER",
+    "reference": "DEMO-BO-007",
+    "category": "body",
+    "quality": "Aftermarket",
+    "compatible": "Golf 7 · Octavia 3 · Leon 5F",
+    "price": "Prix sur demande",
+    "image": "placeholder-body",
+    "description": "Produit de démonstration à remplacer par votre vraie photo et référence."
+  }
+]

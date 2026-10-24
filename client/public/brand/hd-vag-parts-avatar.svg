@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800" role="img" aria-labelledby="title">
+  <title id="title">HD VAG PARTS — avatar</title>
+  <rect width="800" height="800" rx="180" fill="#11161C"/>
+  <path d="M400 108 620 235v254L400 616 180 489V235Z" fill="none" stroke="#2D8CFF" stroke-width="28"/>
+  <path d="M400 108v127M180 235l220 127 220-127M400 362v254" fill="none" stroke="#F4F7FA" stroke-width="17" opacity=".55"/>
+  <path d="M278 486V303h59v65h82v-65h59v183h-59v-64h-82v64Zm255-183h62c64 0 100 35 100 91s-36 92-100 92h-62Zm59 48v87h15c28 0 42-13 42-44 0-30-14-43-42-43Z" fill="#F4F7FA"/>
+  <circle cx="582" cy="199" r="26" fill="#FFB547"/>
+  <text x="400" y="718" text-anchor="middle" fill="#2D8CFF" font-family="Plus Jakarta Sans, Arial, sans-serif" font-size="38" font-weight="800" letter-spacing="9">PARTS</text>
+</svg>

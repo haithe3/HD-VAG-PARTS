@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2160 1920" role="img" aria-labelledby="title">
+  <title id="title">HD VAG PARTS — modèles sociaux carré et story</title>
+  <rect width="2160" height="1920" fill="#0E1318"/>
+  <rect x="80" y="80" width="960" height="960" rx="52" fill="#11161C" stroke="#2D8CFF" stroke-width="4"/>
+  <rect x="1120" y="80" width="960" height="1760" rx="52" fill="#11161C" stroke="#2D8CFF" stroke-width="4"/>
+  <g transform="translate(160 180)">
+    <path d="M130 10 224 64v108l-94 54-94-54V64Z" fill="none" stroke="#2D8CFF" stroke-width="14"/>
+    <path d="M130 10v54M36 64l94 54 94-54M130 118v108" fill="none" stroke="#F4F7FA" stroke-width="8" opacity=".5"/>
+    <text x="130" y="154" text-anchor="middle" fill="#F4F7FA" font-family="Space Grotesk, Arial, sans-serif" font-size="62" font-weight="700">HD</text>
+  </g>
+  <text x="160" y="520" fill="#F4F7FA" font-family="Space Grotesk, Arial, sans-serif" font-size="82" font-weight="700" letter-spacing="5">NOUVELLE PIÈCE</text>
+  <text x="160" y="610" fill="#2D8CFF" font-family="Plus Jakarta Sans, Arial, sans-serif" font-size="32" font-weight="800" letter-spacing="5">RÉFÉRENCE / MODÈLE</text>
+  <rect x="160" y="730" width="680" height="4" fill="#FFB547"/>
+  <text x="160" y="852" fill="#A9B5C2" font-family="Plus Jakarta Sans, Arial, sans-serif" font-size="28">Remplacez ce texte par votre offre</text>
+  <text x="160" y="900" fill="#A9B5C2" font-family="Noto Sans Arabic, Arial, sans-serif" font-size="28">بدّل النص بعرضك</text>
+  <text x="160" y="974" fill="#F4F7FA" font-family="Plus Jakarta Sans, Arial, sans-serif" font-size="24" font-weight="700" letter-spacing="2">WHATSAPP 0540 39 93 26</text>
+  <g transform="translate(1230 220)">
+    <path d="M290 10 500 132v242L290 496 80 374V132Z" fill="none" stroke="#2D8CFF" stroke-width="22"/>
+    <path d="M290 10v122M80 132l210 122 210-122M290 254v242" fill="none" stroke="#F4F7FA" stroke-width="12" opacity=".5"/>
+    <text x="290" y="330" text-anchor="middle" fill="#F4F7FA" font-family="Space Grotesk, Arial, sans-serif" font-size="132" font-weight="700">HD</text>
+  </g>
+  <text x="1200" y="820" fill="#F4F7FA" font-family="Space Grotesk, Arial, sans-serif" font-size="76" font-weight="700" letter-spacing="4">PIÈCES VAG</text>
+  <text x="1200" y="902" fill="#2D8CFF" font-family="Plus Jakarta Sans, Arial, sans-serif" font-size="28" font-weight="800" letter-spacing="4">PRÊTES À CONFIRMER</text>
+  <text x="1200" y="1070" fill="#F4F7FA" font-family="Plus Jakarta Sans, Arial, sans-serif" font-size="31">Envoyez votre VIN.</text>
+  <text x="1200" y="1122" fill="#A9B5C2" font-family="Noto Sans Arabic, Arial, sans-serif" font-size="31">أرسل رقم الشاسيه.</text>
+  <path d="M1200 1250h620" stroke="#FFB547" stroke-width="6"/>
+  <text x="1200" y="1370" fill="#F4F7FA" font-family="Plus Jakarta Sans, Arial, sans-serif" font-size="28">Produit / référence / wilaya</text>
+  <text x="1200" y="1432" fill="#A9B5C2" font-family="Plus Jakarta Sans, Arial, sans-serif" font-size="24">À personnaliser pour chaque post</text>
+  <rect x="1200" y="1580" width="620" height="94" rx="47" fill="#2D8CFF"/>
+  <text x="1510" y="1640" text-anchor="middle" fill="#06111D" font-family="Plus Jakarta Sans, Arial, sans-serif" font-size="26" font-weight="800">COMMANDER SUR WHATSAPP</text>
+</svg>

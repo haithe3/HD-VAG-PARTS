@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1640 856" role="img" aria-labelledby="title">
+  <title id="title">HD VAG PARTS — couverture Facebook</title>
+  <rect width="1640" height="856" fill="#11161C"/>
+  <path d="M0 670 1640 170" stroke="#2D8CFF" stroke-width="2" opacity=".25"/>
+  <path d="M0 748 1640 248" stroke="#2D8CFF" stroke-width="12" opacity=".22"/>
+  <path d="M1030 0 1640 0 1640 856 920 856Z" fill="#18222C"/>
+  <path d="M1028 0 1640 0" stroke="#FFB547" stroke-width="9"/>
+  <g transform="translate(104 188) scale(.85)">
+    <path d="M92 3 158 41v76l-66 38-66-38V41Z" fill="none" stroke="#2D8CFF" stroke-width="10"/>
+    <path d="M92 3v34M26 41l66 38 66-38M92 79v76" fill="none" stroke="#F4F7FA" stroke-width="6" opacity=".55"/>
+    <path d="M54 104V58h15v16h20V58h15v46H89V88H69v16Zm64-46h18c16 0 25 9 25 23s-9 23-25 23h-18Zm15 12v22h4c7 0 11-3 11-11s-4-11-11-11Z" fill="#F4F7FA"/>
+    <circle cx="146" cy="31" r="7" fill="#FFB547"/>
+  </g>
+  <text x="104" y="410" fill="#F4F7FA" font-family="Space Grotesk, Arial, sans-serif" font-size="88" font-weight="700" letter-spacing="6">HD VAG PARTS</text>
+  <text x="108" y="485" fill="#2D8CFF" font-family="Plus Jakarta Sans, Arial, sans-serif" font-size="28" font-weight="800" letter-spacing="5">PIÈCES VAG • ALGÉRIE</text>
+  <text x="108" y="592" fill="#F4F7FA" font-family="Plus Jakarta Sans, Arial, sans-serif" font-size="34">Pièce correcte. Prix confirmé. Livraison partout.</text>
+  <text x="108" y="648" fill="#A9B5C2" font-family="Noto Sans Arabic, Arial, sans-serif" font-size="30">قطع VAG موثوقة — التوصيل إلى كل الولايات</text>
+  <text x="108" y="740" fill="#FFB547" font-family="Plus Jakarta Sans, Arial, sans-serif" font-size="26" font-weight="700" letter-spacing="2">WHATSAPP 0540 39 93 26</text>
+  <g transform="translate(1160 238)">
+    <circle cx="170" cy="170" r="166" fill="none" stroke="#2D8CFF" stroke-width="3" opacity=".35"/>
+    <circle cx="170" cy="170" r="110" fill="none" stroke="#F4F7FA" stroke-width="2" opacity=".4" stroke-dasharray="8 15"/>
+    <path d="m170 39 94 54v108l-94 54-94-54V93Z" fill="none" stroke="#2D8CFF" stroke-width="13"/>
+    <text x="170" y="190" text-anchor="middle" fill="#F4F7FA" font-family="Space Grotesk, Arial, sans-serif" font-size="76" font-weight="700">HD</text>
+  </g>
+</svg>
