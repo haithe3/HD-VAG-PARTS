@@ -28,4 +28,6 @@ Dans Netlify : **Site settings → Domain management → Add custom domain**, pu
 
 ## Fichiers de marque
 
+Le logo fourni par le client est la source principale utilisée dans le site : `client/public/brand/hd-vag-parts-user-logo.jpg`. Pour le remplacer plus tard, gardez ce même chemin ou modifiez la source dans le composant `Logo` de `client/src/App.tsx`.
+
 Les fichiers éditables sont dans `brand/` et leurs versions servies par le site dans `client/public/brand/` : logo SVG clair/foncé, logo PNG clair/foncé, avatar carré, couverture Facebook, post carré et story 9:16. Les textes des modèles sont en SVG pour rester modifiables dans Figma, Illustrator ou Inkscape.

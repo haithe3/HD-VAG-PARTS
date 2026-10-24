@@ -175,8 +175,7 @@ function useSeo(lang: Lang, title: string, description: string) {
 function Logo({ compact = false }: { compact?: boolean }) {
   return (
     <Link href="/" className="brand-lockup" aria-label="HD VAG PARTS — Accueil">
-      <span className="brand-mark" aria-hidden="true"><span>HD</span></span>
-      {!compact && <span className="brand-wordmark"><strong>HD VAG</strong><em>PARTS</em></span>}
+      <img className={`brand-logo ${compact ? "compact" : ""}`} src="/brand/hd-vag-parts-user-logo.jpg" alt="HD VAG PARTS" />
     </Link>
   );
 }

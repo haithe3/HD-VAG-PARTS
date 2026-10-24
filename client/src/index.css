@@ -42,6 +42,8 @@ button { border: 0; }
 .site-header { position: relative; z-index: 30; background: rgba(17,22,28,.96); color: var(--paper); border-bottom: 1px solid rgba(255,255,255,.08); }
 .header-inner { min-height: 76px; display: flex; align-items: center; justify-content: space-between; gap: 24px; }
 .brand-lockup { display: inline-flex; align-items: center; gap: 12px; min-width: max-content; }
+.brand-logo { display: block; width: 132px; height: auto; border-radius: 5px; }
+.brand-logo.compact { width: 108px; }
 .brand-mark { position: relative; width: 38px; height: 38px; display: grid; place-items: center; color: var(--paper); font: 700 12px/1 "Space Grotesk", sans-serif; letter-spacing: -.8px; }
 .brand-mark::before { content: ""; position: absolute; inset: 3px 0; border: 2px solid var(--blue); clip-path: polygon(50% 0, 100% 22%, 100% 78%, 50% 100%, 0 78%, 0 22%); }
 .brand-mark::after { content: ""; position: absolute; width: 5px; height: 5px; border-radius: 99px; background: var(--amber); top: 3px; right: 3px; }
@@ -259,6 +261,7 @@ button { border: 0; }
 @media (max-width: 760px) {
   .container { width: min(100% - 32px, 560px); }
   .header-inner { min-height: 68px; }
+  .brand-logo { width: 116px; }
   .desktop-nav { display: none; }
   .menu-button { display: grid; place-items: center; }
   .mobile-nav-wrap { display: block; position: absolute; top: 68px; left: 0; right: 0; padding: 12px 0 18px; background: var(--graphite-900); border-bottom: 1px solid var(--line-dark); box-shadow: 0 14px 25px rgba(0,0,0,.16); }
