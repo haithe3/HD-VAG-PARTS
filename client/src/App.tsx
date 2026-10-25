@@ -60,6 +60,8 @@ const categoryList: Array<{ key: CategoryKey; fr: string; ar: string; icon: type
   { key: "brakes", fr: "Freinage", ar: "الفرامل", icon: Gauge, short: "Freinage" },
   { key: "engine", fr: "Moteur", ar: "المحرك", icon: Zap, short: "Moteur" },
   { key: "suspension", fr: "Suspension", ar: "التعليق", icon: CarFront, short: "Suspension" },
+  { key: "cooling", fr: "Refroidissement", ar: "التبريد", icon: Fuel, short: "Refroid." },
+  { key: "transmission", fr: "Transmission", ar: "ناقل الحركة", icon: Gauge, short: "Transmission" },
   { key: "electrical", fr: "Électricité", ar: "الكهرباء", icon: Sparkles, short: "Électricité" },
   { key: "fluids", fr: "Huiles & fluides", ar: "الزيوت والسوائل", icon: Fuel, short: "Fluides" },
   { key: "body", fr: "Carrosserie", ar: "هيكل السيارة", icon: Hammer, short: "Carrosserie" },
@@ -83,13 +85,13 @@ const copy = {
       ["01", "Vérification sur VIN", "Votre numéro de châssis aide à confirmer la compatibilité avant de commander."],
       ["02", "Référence claire", "Original, OEM ou Aftermarket : le niveau de qualité est indiqué à chaque fois."],
       ["03", "Sourcing à la demande", "Nous cherchons la pièce auprès de notre boutique partenaire selon votre besoin."],
-      ["04", "Livraison nationale", "On livre partout en Algérie, avec suivi du dépôt jusqu’à la réception."],
+      ["04", "Livraison nationale", "On livre partout en Algérie. Délai et coût confirmés avec vous sur WhatsApp."],
     ],
     deliveryTitle: "Un doute sur la pièce ? On regarde avec vous.",
     deliveryText: "Envoyez le VIN, une photo si vous l’avez et votre wilaya. Nous revenons vers vous sur WhatsApp avec la référence et le prix.",
     deliveryCta: "Décrire ma demande",
-    catalogTitle: "Catalogue de démonstration",
-    catalogText: "Les photos et références ci-dessous sont des placeholders à remplacer par vos vrais produits.",
+    catalogTitle: "Catalogue pièces auto",
+    catalogText: "Pièces VAG et autres marques. Envoyez votre VIN : nous confirmons la compatibilité avant toute commande.",
     order: "Commander sur WhatsApp",
     reference: "Réf.",
     compatible: "Compatible avec",
@@ -126,7 +128,7 @@ const copy = {
       ["04", "Livraison", "Votre commande part vers votre wilaya, avec les informations de réception."],
     ],
     policyTitle: "Livraison & retours",
-    policyText: "Une base claire, à ajuster selon votre fonctionnement.",
+    policyText: "Livraison, paiement et retours : des conditions claires avant de commander.",
     contactTitle: "Parlons de votre véhicule.",
     contactText: "Un message WhatsApp suffit pour commencer. Réponse simple, sans jargon inutile.",
     openWhatsApp: "Ouvrir WhatsApp",
@@ -150,13 +152,13 @@ const copy = {
       ["01", "تأكيد عبر VIN", "رقم الشاسيه يساعدنا نتأكد من التوافق قبل الطلب."],
       ["02", "مرجع واضح", "Original أو OEM أو Aftermarket: الجودة مكتوبة بوضوح."],
       ["03", "توفير حسب الطلب", "نبحث عن القطعة عند شريكنا حسب حاجتك."],
-      ["04", "توصيل وطني", "نوصل لكل ولايات الجزائر ونتابع الطلب حتى الاستلام."],
+      ["04", "توصيل وطني", "نوصل لكل ولايات الجزائر. المدة والسعر يتأكدو معاك عبر واتساب."],
     ],
     deliveryTitle: "ماكش متأكد من القطعة؟ نشوفوها معاك.",
     deliveryText: "أرسل رقم الشاسيه، صورة إذا كانت عندك والولاية. نرجعولك على واتساب بالمرجع والسعر.",
     deliveryCta: "اشرح طلبي",
-    catalogTitle: "كتالوج تجريبي",
-    catalogText: "الصور والمراجع هنا مؤقتة. بدّلها بمنتجاتك الحقيقية.",
+    catalogTitle: "كتالوج قطع الغيار",
+    catalogText: "قطع VAG وماركات أخرى. ابعت الـ VIN ونأكدولك التوافق قبل أي طلب.",
     order: "اطلب عبر واتساب",
     reference: "المرجع",
     compatible: "متوافق مع",
@@ -193,7 +195,7 @@ const copy = {
       ["04", "التوصيل", "الطلب يروح لولايتك مع معلومات الاستلام."],
     ],
     policyTitle: "التوصيل والإرجاع",
-    policyText: "نص أساسي تقدر تعدلو حسب طريقة خدمتك.",
+    policyText: "التوصيل، الدفع والإرجاع: شروط واضحة قبل ما تطلب.",
     contactTitle: "احكيلنا على سيارتك.",
     contactText: "رسالة واتساب تكفي باش نبدأو. جواب واضح وبدون تعقيد.",
     openWhatsApp: "افتح واتساب",
@@ -277,10 +279,13 @@ function Shell({ lang, setLang, children }: { lang: Lang; setLang: (lang: Lang) 
 
 function Eyebrow({ children }: { children: React.ReactNode }) { return <div className="eyebrow"><span className="eyebrow-line" />{children}</div>; }
 
-function ProductVisual({ product }: { product: Product }) {
-  const iconMap: Record<string, typeof Fuel> = { filters: Fuel, brakes: Gauge, engine: Zap, suspension: CarFront, electrical: Sparkles, fluids: Fuel, body: Hammer };
+function ProductVisual({ product, lang }: { product: Product; lang: Lang }) {
+  const iconMap: Record<string, typeof Fuel> = { filters: Fuel, brakes: Gauge, engine: Zap, suspension: CarFront, electrical: Sparkles, fluids: Fuel, body: Hammer, cooling: Fuel, transmission: Gauge };
   const Icon = iconMap[product.category] || Sparkles;
-  return <div className={`product-visual ${product.category}`}><div className="visual-grid" /><Icon size={40} strokeWidth={1.3} /><span>PLACEHOLDER</span><small>PHOTO</small></div>;
+  if (product.image && product.image.startsWith("/")) {
+    return <div className="product-photo" style={{ height: 210, overflow: "hidden", background: "#10151C" }}><img src={product.image} alt={product.name} loading="lazy" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} /></div>;
+  }
+  return <div className={`product-visual ${product.category}`}><div className="visual-grid" /><Icon size={40} strokeWidth={1.3} /><span>{lang === "fr" ? "PHOTO À VENIR" : "الصورة قريبا"}</span></div>;
 }
 
 function CompatibilityTool({ lang }: { lang: Lang }) {
@@ -342,9 +347,27 @@ function CategoryPills({ lang, active, setActive }: { lang: Lang; active: Catego
 
 function ProductCard({ lang, product }: { lang: Lang; product: Product }) {
   const t = copy[lang];
-  const message = lang === "fr" ? `Bonjour HD VAG PARTS, je souhaite commander : ${product.name}, référence ${product.reference}. Mon véhicule : ` : `السلام عليكم، أريد طلب القطعة: ${product.name}، المرجع ${product.reference}. السيارة: `;
-  return <article className="product-card"><ProductVisual product={product} /><div className="product-body"><div className="product-topline"><span className={`quality quality-${product.quality.toLowerCase()}`}>{product.quality}</span><span className="product-ref">{t.reference} {product.reference}</span></div><h3>{product.name}</h3><p className="product-compatible"><span>{t.compatible}</span> {product.compatible}</p><div className="product-footer"><strong>{product.price}</strong><a className="product-order" href={whatsappUrl(message)} target="_blank" rel="noreferrer"><MessageCircle size={16} />{t.order}</a></div></div></article>;
+  const brandFr = product.brand ? `, marque ${product.brand}` : "";
+  const brandAr = product.brand ? `، الماركة ${product.brand}` : "";
+  const message = lang === "fr" ? `Bonjour HD VAG PARTS, je souhaite commander : ${product.name}, référence ${product.reference}${brandFr}. Mon véhicule (modèle, année, moteur) : ` : `السلام عليكم، أريد طلب القطعة: ${product.name}، المرجع ${product.reference}${brandAr}. السيارة (الموديل، السنة، المحرك): `;
+  const badge = product.quality ? <span className={`quality quality-${product.quality.toLowerCase()}`}>{product.quality}</span> : product.brand ? <span className="quality">{product.brand}</span> : <span />;
+  const compatibleLabel = lang === "fr" ? "Véhicules (selon désignation)" : "السيارات (حسب التسمية)";
+  const compatibleFallback = lang === "fr" ? "à confirmer avec votre VIN" : "نأكدوها معاك بالـ VIN";
+  const availability = lang === "fr" ? "Disponibilité à confirmer" : "التوفر يتأكد على واتساب";
+  return <article className="product-card"><ProductVisual product={product} lang={lang} /><div className="product-body"><div className="product-topline">{badge}<span className="product-ref">{t.reference} {product.reference}</span></div><h3>{product.name}</h3><p className="product-compatible"><span>{product.compatible ? compatibleLabel : t.compatible}</span> {product.compatible || compatibleFallback}</p><div className="product-footer"><div><strong>{product.price}</strong><small style={{ display: "block", fontSize: 10, opacity: 0.65, marginTop: 3 }}>{availability}</small></div><a className="product-order" href={whatsappUrl(message)} target="_blank" rel="noreferrer"><MessageCircle size={16} />{t.order}</a></div></div></article>;
 }
+
+const PAGE_SIZE = 24;
+
+function foldText(value: string) {
+  return value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+}
+
+const searchIndex = productsData.map((product) => ({
+  product,
+  haystack: foldText(`${product.name} ${product.reference} ${product.brand} ${product.compatible} ${product.keywords}`),
+  compactRef: normalizeReference(product.reference).toLowerCase(),
+}));
 
 function Catalog({ lang }: { lang: Lang }) {
   const t = copy[lang];
@@ -352,9 +375,18 @@ function Catalog({ lang }: { lang: Lang }) {
   const initialCategory = (query?.get("cat") as CategoryKey) || "all";
   const [active, setActive] = useState<CategoryKey>(categoryList.some((item) => item.key === initialCategory) ? initialCategory : "all");
   const [search, setSearch] = useState("");
+  const [visible, setVisible] = useState(PAGE_SIZE);
   useSeo(lang, t.catalogTitle, t.catalogText);
-  const filtered = useMemo(() => productsData.filter((product) => (active === "all" || product.category === active) && `${product.name} ${product.reference} ${product.compatible}`.toLowerCase().includes(search.toLowerCase())), [active, search]);
-  return <section className="page-section"><div className="container"><div className="page-intro"><Eyebrow>{t.kicker}</Eyebrow><h1>{t.catalogTitle}</h1><p>{t.catalogText}</p></div><div className="catalog-toolbar"><CategoryPills lang={lang} active={active} setActive={setActive} /><label className="search-box"><Search size={18} /><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder={lang === "fr" ? "Rechercher une pièce ou une référence" : "ابحث عن قطعة أو مرجع"} /></label></div><div className="placeholder-note"><Sparkles size={17} /><span>{lang === "fr" ? "Produits de démonstration — remplacez les photos, noms, références et prix dans products.json." : "منتجات تجريبية — بدّل الصور والأسماء والمراجع والأسعار في ملف products.json."}</span></div><div className="product-grid">{filtered.map((product) => <ProductCard key={product.id} lang={lang} product={product} />)}</div>{filtered.length === 0 && <div className="empty-state"><Search size={30} /><h3>{lang === "fr" ? "Aucun résultat" : "لا توجد نتائج"}</h3><p>{lang === "fr" ? "Essayez une autre référence ou contactez-nous sur WhatsApp." : "جرب مرجع آخر أو تواصل معنا عبر واتساب."}</p></div>}</div></section>;
+  useEffect(() => { setVisible(PAGE_SIZE); }, [active, search]);
+  const filtered = useMemo(() => {
+    const terms = foldText(search).split(/\s+/).filter(Boolean);
+    return searchIndex
+      .filter(({ product, haystack, compactRef }) => (active === "all" || product.category === active) && terms.every((term) => haystack.includes(term) || compactRef.includes(term.replace(/-/g, ""))))
+      .map(({ product }) => product);
+  }, [active, search]);
+  const shown = filtered.slice(0, visible);
+  const remaining = filtered.length - shown.length;
+  return <section className="page-section"><div className="container"><div className="page-intro"><Eyebrow>{t.kicker}</Eyebrow><h1>{t.catalogTitle}</h1><p>{t.catalogText}</p></div><div className="catalog-toolbar"><CategoryPills lang={lang} active={active} setActive={setActive} /><label className="search-box"><Search size={18} /><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder={lang === "fr" ? "Rechercher une pièce ou une référence" : "ابحث عن قطعة أو مرجع"} /></label></div><p style={{ margin: "0 0 16px", fontSize: 12, opacity: 0.7 }}>{filtered.length} {lang === "fr" ? "pièces" : "قطعة"}</p><div className="product-grid">{shown.map((product) => <ProductCard key={product.id} lang={lang} product={product} />)}</div>{remaining > 0 && <div style={{ textAlign: "center", marginTop: 28 }}><button type="button" className="button button-primary" onClick={() => setVisible(visible + PAGE_SIZE)}>{lang === "fr" ? `Voir plus (${remaining} restantes)` : `عرض المزيد (${remaining} متبقية)`}</button></div>}{filtered.length === 0 && <div className="empty-state"><Search size={30} /><h3>{lang === "fr" ? "Aucun résultat" : "لا توجد نتائج"}</h3><p>{lang === "fr" ? "Essayez une autre référence ou contactez-nous sur WhatsApp." : "جرب مرجع آخر أو تواصل معنا عبر واتساب."}</p></div>}</div></section>;
 }
 
 function Field({ label, name, required = false, children, type = "text", placeholder }: { label: string; name: string; required?: boolean; children?: React.ReactNode; type?: string; placeholder?: string }) {
@@ -398,7 +430,7 @@ function Policies({ lang }: { lang: Lang }) {
     ["التأكد قبل الطلب", "قبل ما نأكدو، نبعثولك المرجع، نوع الجودة المتوفر (Original / OEM / Aftermarket) والسعر المتفق عليه."],
     ["الإرجاع", "الإرجاع يدرس حالة بحالة. القطعة الخاصة، المركبة أو المتضررة ممكن ما تتبدلش. تواصل معنا بسرعة مع الصور ومرجع الطلب."],
   ];
-  return <section className="page-section policy-page"><div className="container narrow-container"><div className="page-intro"><Eyebrow>{t.kicker}</Eyebrow><h1>{t.policyTitle}</h1><p>{t.policyText}</p></div><div className="policy-list">{sections.map(([title, text], index) => <article key={title}><span>0{index + 1}</span><div><h2>{title}</h2><p>{text}</p></div></article>)}</div><div className="editable-note"><Sparkles size={18} /><div><strong>{lang === "fr" ? "Texte éditable" : "نص قابل للتعديل"}</strong><p>{lang === "fr" ? "Retrouvez ce contenu dans `client/src/App.tsx`, section Policies, pour adapter les conditions de votre entreprise." : "تقدر تبدل هذا النص في ملف App.tsx، قسم Policies، حسب طريقة خدمتك."}</p></div></div></div></section>;
+  return <section className="page-section policy-page"><div className="container narrow-container"><div className="page-intro"><Eyebrow>{t.kicker}</Eyebrow><h1>{t.policyTitle}</h1><p>{t.policyText}</p></div><div className="policy-list">{sections.map(([title, text], index) => <article key={title}><span>0{index + 1}</span><div><h2>{title}</h2><p>{text}</p></div></article>)}</div></div></section>;
 }
 
 function Contact({ lang }: { lang: Lang }) {
