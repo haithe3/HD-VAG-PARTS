@@ -28,14 +28,31 @@ import {
   Zap,
 } from "lucide-react";
 import productsData from "./data/products.json";
+import compatibilityData from "./data/compatibility.json";
 
 type Lang = "fr" | "ar";
 type Product = (typeof productsData)[number];
+type CompatibilityRow = (typeof compatibilityData)[number];
 type CategoryKey = Product["category"] | "all";
 
 const WHATSAPP_NUMBER = "213540399326";
 const DISPLAY_PHONE = "0540 39 93 26";
 const HERO_IMAGE = "/manus-storage/async-images/VBl7plW3sxrVnHfet4JVdk/image-1.webp";
+const VIN_PATTERN = /^[A-HJ-NPR-Z0-9]{17}$/;
+
+function normalizeVin(value: string) {
+  return value.replace(/\s/g, "").toUpperCase();
+}
+
+function normalizeReference(value: string) {
+  return value.replace(/[\s-]/g, "").toUpperCase();
+}
+
+function brandFromWmi(vin: string, lang: Lang) {
+  const wmi = vin.slice(0, 3);
+  const brands: Record<string, string> = { WVW: "Volkswagen", WVG: "Volkswagen", WAU: "Audi", WUA: "Audi", TMB: "Škoda", VSS: "SEAT" };
+  return brands[wmi] || (lang === "fr" ? "Marque à confirmer" : "العلامة تحتاج تأكيد");
+}
 
 const categoryList: Array<{ key: CategoryKey; fr: string; ar: string; icon: typeof Fuel; short: string }> = [
   { key: "all", fr: "Tout le catalogue", ar: "كل الكتالوج", icon: Sparkles, short: "Tout" },
@@ -50,7 +67,7 @@ const categoryList: Array<{ key: CategoryKey; fr: string; ar: string; icon: type
 
 const copy = {
   fr: {
-    nav: { home: "Accueil", catalog: "Catalogue", find: "Trouver ma pièce", how: "Comment ça marche", policy: "Livraison & retours", contact: "Contact" },
+    nav: { home: "Accueil", catalog: "Catalogue", find: "Trouver ma pièce", compatibility: "Vérifier compatibilité", how: "Comment ça marche", policy: "Livraison & retours", contact: "Contact" },
     kicker: "PIÈCES VAG · ALGÉRIE",
     heroTitle: "Pièces VAG fiables, livrées partout en Algérie.",
     heroText: "Envoyez votre VIN. Nous vérifions la bonne référence, confirmons le prix et organisons la livraison dans votre wilaya.",
@@ -83,6 +100,21 @@ const copy = {
     findTitle: "Trouvez la bonne pièce avec votre VIN.",
     findText: "Remplissez ce formulaire. Les détails seront préparés dans un message WhatsApp pour accélérer la vérification.",
     sendRequest: "Envoyer la demande sur WhatsApp",
+    compatibilityTitle: "Vérifier la compatibilité",
+    compatibilityText: "Entrez votre VIN et la référence OEM. Nous indiquons la marque selon les trois premiers caractères et vérifions la référence dans notre base éditable.",
+    compatibilityCta: "Vérifier une référence",
+    vinLabel: "VIN (17 caractères)",
+    partReferenceLabel: "Référence de la pièce",
+    checkCompatibility: "Vérifier la compatibilité",
+    vinError: "VIN invalide : 17 lettres/chiffres exactement, sans I, O ou Q.",
+    brandDetected: "Marque indiquée par le WMI",
+    resultNote: "Résultat indicatif, confirmé par notre équipe avant commande.",
+    foundResult: "Référence trouvée",
+    notFoundResult: "Référence non confirmée dans notre base. Nous la vérifions avec votre VIN.",
+    partReferenced: "Pièce référencée pour",
+    finalConfirmation: "Confirmation finale par WhatsApp avec votre VIN.",
+    orderPart: "Commander sur WhatsApp",
+    verifyOnWhatsApp: "Vérifier sur WhatsApp",
     photoHint: "Optionnel — ajoutez ensuite la photo directement dans WhatsApp.",
     requiredHint: "Les champs marqués * nous aident à vérifier la compatibilité.",
     howTitle: "Simple, en quatre étapes.",
@@ -102,7 +134,7 @@ const copy = {
     footerLine: "Pièces VAG fiables · Livraison dans toutes les wilayas · Commande par WhatsApp",
   },
   ar: {
-    nav: { home: "الرئيسية", catalog: "الكتالوج", find: "أبحث عن قطعة", how: "كيف نعمل", policy: "التوصيل والإرجاع", contact: "اتصل بنا" },
+    nav: { home: "الرئيسية", catalog: "الكتالوج", find: "أبحث عن قطعة", compatibility: "تحقق من التوافق", how: "كيف نعمل", policy: "التوصيل والإرجاع", contact: "اتصل بنا" },
     kicker: "قطع VAG · الجزائر",
     heroTitle: "قطع VAG موثوقة، والتوصيل إلى كل ولايات الجزائر.",
     heroText: "أرسل رقم الشاسيه. نتحقق من المرجع الصحيح، نؤكد السعر، ونرتب التوصيل إلى ولايتك.",
@@ -135,6 +167,21 @@ const copy = {
     findTitle: "نلقاو القطعة الصحيحة برقم الشاسيه.",
     findText: "عمر الاستمارة. التفاصيل تتحضر في رسالة واتساب باش نسرعو التحقق.",
     sendRequest: "أرسل الطلب عبر واتساب",
+    compatibilityTitle: "تحقق من توافق القطعة",
+    compatibilityText: "دخل رقم VIN والمرجع OEM. نعرض العلامة حسب أول ثلاثة أحرف، ونقلبو على المرجع في قاعدة بيانات قابلة للتعديل.",
+    compatibilityCta: "تحقق من مرجع",
+    vinLabel: "VIN (17 حرف ورقم)",
+    partReferenceLabel: "مرجع القطعة",
+    checkCompatibility: "تحقق من التوافق",
+    vinError: "VIN غير صحيح: لازم 17 حرف/رقم بالضبط، بلا I أو O أو Q.",
+    brandDetected: "العلامة حسب WMI",
+    resultNote: "النتيجة إرشادية، ويأكدها فريقنا قبل الطلب.",
+    foundResult: "المرجع موجود",
+    notFoundResult: "المرجع غير مؤكد في القاعدة. نتحقق منه مع رقم VIN تاعك.",
+    partReferenced: "القطعة مرجعة للموديلات",
+    finalConfirmation: "التأكيد النهائي يكون عبر واتساب مع VIN تاعك.",
+    orderPart: "اطلب عبر واتساب",
+    verifyOnWhatsApp: "تحقق عبر واتساب",
     photoHint: "اختياري — أضف الصورة مباشرة في واتساب بعد الإرسال.",
     requiredHint: "الخانات التي فيها * تساعدنا نتأكد من التوافق.",
     howTitle: "أربع خطوات بسيطة.",
@@ -175,7 +222,7 @@ function useSeo(lang: Lang, title: string, description: string) {
 function Logo({ compact = false }: { compact?: boolean }) {
   return (
     <Link href="/" className="brand-lockup" aria-label="HD VAG PARTS — Accueil">
-      <img className={`brand-logo ${compact ? "compact" : ""}`} src="/brand/hd-vag-parts-user-logo.jpg" alt="HD VAG PARTS" />
+      <img className={`brand-logo ${compact ? "compact" : ""}`} src="/brand/hd-vag-parts-user-logo-transparent-cropped.png" alt="HD VAG PARTS" />
     </Link>
   );
 }
@@ -188,6 +235,7 @@ function Header({ lang, setLang }: { lang: Lang; setLang: (lang: Lang) => void }
     ["/", t.nav.home],
     ["/catalogue", t.nav.catalog],
     ["/trouver-ma-piece", t.nav.find],
+    ["/verifier-compatibilite", t.nav.compatibility],
     ["/comment-ca-marche", t.nav.how],
     ["/livraison-retours", t.nav.policy],
     ["/contact", t.nav.contact],
@@ -235,12 +283,51 @@ function ProductVisual({ product }: { product: Product }) {
   return <div className={`product-visual ${product.category}`}><div className="visual-grid" /><Icon size={40} strokeWidth={1.3} /><span>PLACEHOLDER</span><small>PHOTO</small></div>;
 }
 
+function CompatibilityTool({ lang }: { lang: Lang }) {
+  const t = copy[lang];
+  const [vin, setVin] = useState("");
+  const [reference, setReference] = useState("");
+  const [error, setError] = useState("");
+  const [result, setResult] = useState<CompatibilityRow | null | undefined>(undefined);
+  const normalizedVin = normalizeVin(vin);
+  const normalizedReference = normalizeReference(reference);
+  const detectedBrand = normalizedVin.length >= 3 ? brandFromWmi(normalizedVin, lang) : "";
+
+  function check(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const cleanVin = normalizeVin(vin);
+    const cleanReference = normalizeReference(reference);
+    if (!VIN_PATTERN.test(cleanVin)) {
+      setError(t.vinError);
+      setResult(undefined);
+      return;
+    }
+    setError("");
+    const match = compatibilityData.find((row) => !row.placeholder && normalizeReference(row.reference) === cleanReference);
+    setResult(match || null);
+  }
+
+  function openWhatsApp(message: string) {
+    window.open(whatsappUrl(message), "_blank", "noopener,noreferrer");
+  }
+
+  const foundMessage = lang === "fr"
+    ? `Bonjour HD VAG PARTS, je souhaite commander la pièce ${result?.partName}, référence ${result?.reference}. VIN : ${normalizedVin}.`
+    : `السلام عليكم HD VAG PARTS، نحب نطلب القطعة ${result?.partName}، المرجع ${result?.reference}. VIN: ${normalizedVin}.`;
+  const notFoundMessage = lang === "fr"
+    ? `Bonjour HD VAG PARTS, pouvez-vous vérifier la référence ${normalizedReference} avec mon VIN ${normalizedVin} ?`
+    : `السلام عليكم HD VAG PARTS، تقدروا تتحققوا من المرجع ${normalizedReference} مع VIN ${normalizedVin}؟`;
+
+  return <section id="verifier-compatibilite" className="section compatibility-section"><div className="container compatibility-layout"><div className="compatibility-intro"><Eyebrow>{lang === "fr" ? "VIN · RÉFÉRENCE OEM" : "VIN · مرجع OEM"}</Eyebrow><h2>{t.compatibilityTitle}</h2><p>{t.compatibilityText}</p><div className="compatibility-note"><ShieldCheck size={18} /><span>{lang === "fr" ? "Nous ne décodons pas le modèle ou le moteur à partir du VIN seul." : "ما نفككوش الموديل أو المحرك من VIN وحده."}</span></div></div><form className="compatibility-card" onSubmit={check} noValidate><div className="compatibility-fields"><label className="form-field"><span>{t.vinLabel}<b> *</b></span><input value={vin} onChange={(event) => setVin(event.target.value.toUpperCase())} placeholder="WVWZZZ1KZ9W000000" maxLength={19} autoComplete="off" aria-invalid={Boolean(error)} /></label><label className="form-field"><span>{t.partReferenceLabel}<b> *</b></span><input value={reference} onChange={(event) => setReference(event.target.value.toUpperCase())} placeholder="1K0 698 151" autoComplete="off" /></label></div>{detectedBrand && <p className="wmi-badge"><BadgeCheck size={16} /><span>{t.brandDetected}: <strong>{detectedBrand}</strong></span></p>}{error && <p className="compatibility-error" role="alert"><X size={16} />{error}</p>}<button className="button button-primary compatibility-submit" type="submit">{t.checkCompatibility}<ArrowRight size={17} /></button>{result !== undefined && <div className={`compatibility-result ${result ? "is-found" : "is-not-found"}`} role="status">{result ? <><div className="result-heading"><CircleCheck size={19} /><strong>{t.foundResult}</strong></div><h3>{result.partName}</h3><p><b>{t.partReferenced}:</b> {result.compatibleModels}.</p><p><b>{lang === "fr" ? "Années" : "السنوات"}:</b> {result.years}</p><p className="result-confirmation">{lang === "fr" ? `Pièce référencée pour: ${result.compatibleModels}. ${t.finalConfirmation}` : `${t.partReferenced}: ${result.compatibleModels}. ${t.finalConfirmation}`}</p><button type="button" className="button button-dark" onClick={() => openWhatsApp(foundMessage)}>{t.orderPart}<MessageCircle size={17} /></button></> : <><div className="result-heading"><Search size={19} /><strong>{t.notFoundResult}</strong></div><p>{lang === "fr" ? "Nous vérifions la référence avec votre VIN avant toute commande." : "نتحقق من المرجع مع VIN تاعك قبل أي طلب."}</p><button type="button" className="button button-dark" onClick={() => openWhatsApp(notFoundMessage)}>{t.verifyOnWhatsApp}<MessageCircle size={17} /></button></>}</div>}<p className="compatibility-footnote">{t.resultNote}</p></form></div></section>;
+}
+
 function Home({ lang }: { lang: Lang }) {
   const t = copy[lang];
   useSeo(lang, lang === "fr" ? "Pièces VAG fiables, livrées partout en Algérie" : "قطع VAG موثوقة والتوصيل إلى كل الجزائر", t.heroText);
   return <>
     <section className="hero-section"><div className="hero-image" style={{ backgroundImage: `url(${HERO_IMAGE})` }} /><div className="hero-overlay" /><div className="container hero-content"><div className="hero-copy"><Eyebrow>{t.kicker}</Eyebrow><h1>{t.heroTitle}</h1><p>{t.heroText}</p><div className="hero-actions"><Link href="/trouver-ma-piece" className="button button-primary">{t.heroPrimary}<ArrowRight size={17} /></Link><Link href="/catalogue" className="button button-ghost">{t.heroSecondary}<ArrowDownRight size={17} /></Link></div><div className="hero-trust"><ShieldCheck size={17} /><span>{t.trust}</span></div></div><div className="hero-stamp"><span>HD</span><small>VAG<br />PARTS</small></div></div></section>
     <section className="ticker"><div className="container ticker-inner"><span>VIN FIRST</span><span>•</span><span>VÉRIFICATION</span><span>•</span><span>PRIX CONFIRMÉ</span><span>•</span><span>LIVRAISON ALGÉRIE</span></div></section>
+    <CompatibilityTool lang={lang} />
     <section className="section categories-section"><div className="container"><div className="section-head"><div><Eyebrow>{t.sectionEyebrow}</Eyebrow><h2>{t.categoriesTitle}</h2></div><p>{t.categoriesText}</p></div><div className="category-grid">{categoryList.filter((category) => category.key !== "all").map((category, index) => { const Icon = category.icon; return <Link href={`/catalogue?cat=${category.key}`} className="category-card" key={category.key}><span className="category-number">0{index + 1}</span><Icon size={28} /><strong>{lang === "fr" ? category.fr : category.ar}</strong><span className="category-arrow"><ArrowUpRightIcon /></span></Link>; })}</div></div></section>
     <section className="section dark-section why-section"><div className="container"><div className="section-head light"><div><Eyebrow>{lang === "fr" ? "POURQUOI HD VAG PARTS" : "لماذا HD VAG PARTS"}</Eyebrow><h2>{t.whyTitle}</h2></div><p>{t.whyText}</p></div><div className="why-grid">{t.whyCards.map(([number, title, text]) => <div className="why-card" key={number}><span className="why-number">{number}</span><div><h3>{title}</h3><p>{text}</p></div></div>)}</div></div></section>
     <section className="section delivery-section"><div className="container delivery-panel"><div className="delivery-icon"><Truck size={32} /></div><div><Eyebrow>{lang === "fr" ? "LIVRAISON NATIONALE" : "التوصيل الوطني"}</Eyebrow><h2>{t.deliveryTitle}</h2><p>{t.deliveryText}</p></div><Link href="/trouver-ma-piece" className="button button-dark">{t.deliveryCta}<ArrowRight size={17} /></Link></div></section>
@@ -325,5 +412,5 @@ function NotFoundPage({ lang }: { lang: Lang }) { const t = copy[lang]; return <
 export default function App() {
   const [lang, setLang] = useState<Lang>(() => (localStorage.getItem("hdvag-lang") as Lang) || "fr");
   useEffect(() => localStorage.setItem("hdvag-lang", lang), [lang]);
-  return <Shell lang={lang} setLang={setLang}><Switch><Route path="/" component={() => <Home lang={lang} />} /><Route path="/catalogue" component={() => <Catalog lang={lang} />} /><Route path="/trouver-ma-piece" component={() => <FindPart lang={lang} />} /><Route path="/comment-ca-marche" component={() => <HowItWorks lang={lang} />} /><Route path="/livraison-retours" component={() => <Policies lang={lang} />} /><Route path="/contact" component={() => <Contact lang={lang} />} /><Route component={() => <NotFoundPage lang={lang} />} /></Switch></Shell>;
+  return <Shell lang={lang} setLang={setLang}><Switch><Route path="/" component={() => <Home lang={lang} />} /><Route path="/catalogue" component={() => <Catalog lang={lang} />} /><Route path="/trouver-ma-piece" component={() => <FindPart lang={lang} />} /><Route path="/verifier-compatibilite" component={() => <><section className="page-section compatibility-page-intro"><div className="container page-intro"><Eyebrow>{lang === "fr" ? "VIN · RÉFÉRENCE OEM" : "VIN · مرجع OEM"}</Eyebrow><h1>{copy[lang].compatibilityTitle}</h1><p>{copy[lang].compatibilityText}</p></div></section><CompatibilityTool lang={lang} /></>} /><Route path="/comment-ca-marche" component={() => <HowItWorks lang={lang} />} /><Route path="/livraison-retours" component={() => <Policies lang={lang} />} /><Route path="/contact" component={() => <Contact lang={lang} />} /><Route component={() => <NotFoundPage lang={lang} />} /></Switch></Shell>;
 }

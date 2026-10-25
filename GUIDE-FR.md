@@ -28,6 +28,10 @@ Dans Netlify : **Site settings → Domain management → Add custom domain**, pu
 
 ## Fichiers de marque
 
-Le logo fourni par le client est la source principale utilisée dans le site : `client/public/brand/hd-vag-parts-user-logo.jpg`. Pour le remplacer plus tard, gardez ce même chemin ou modifiez la source dans le composant `Logo` de `client/src/App.tsx`.
+Le logo fourni par le client est la source principale utilisée dans le site : `client/public/brand/hd-vag-parts-user-logo-transparent-cropped.png`. La version PNG possède un vrai fond transparent et est utilisée dans l’en-tête, le pied de page et les aperçus sociaux.
 
 Les fichiers éditables sont dans `brand/` et leurs versions servies par le site dans `client/public/brand/` : logo SVG clair/foncé, logo PNG clair/foncé, avatar carré, couverture Facebook, post carré et story 9:16. Les textes des modèles sont en SVG pour rester modifiables dans Figma, Illustrator ou Inkscape.
+
+## Vérification de compatibilité
+
+Les références sont gérées dans `client/src/data/compatibility.json`. Remplacez les dix lignes `PLACEHOLDER-001` à `PLACEHOLDER-010` par vos données réelles en gardant les colonnes `reference`, `partName`, `brand`, `compatibleModels`, `years`, `engineCodes`, `price`, `quality` et `inStock`. Les références marquées `placeholder: true` ne sont jamais considérées comme des compatibilités réelles.

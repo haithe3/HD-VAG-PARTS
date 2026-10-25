@@ -18,7 +18,7 @@ Pièces VAG fiables, vérifiées sur VIN et livrées partout en Algérie. Ton di
 
 ## Assets
 
-Le fichier fourni par le client est désormais le logo principal du site : `brand/hd-vag-parts-user-logo.jpg` et `client/public/brand/hd-vag-parts-user-logo.jpg`. Il est utilisé dans l’en-tête, le pied de page, le favicon, le manifest et les aperçus sociaux.
+Le fichier fourni par le client est désormais le logo principal du site : `brand/hd-vag-parts-user-logo-transparent-cropped.png` et `client/public/brand/hd-vag-parts-user-logo-transparent-cropped.png`. Il possède un vrai fond transparent et est utilisé dans l’en-tête, le pied de page, le favicon, le manifest et les aperçus sociaux.
 
 - `brand/hd-vag-parts-logo-dark.svg` et `.png` : logo sur fond graphite.
 - `brand/hd-vag-parts-logo-light.svg` et `.png` : logo sur fond clair.

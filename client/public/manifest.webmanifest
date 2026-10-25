@@ -7,5 +7,5 @@
   "display": "standalone",
   "background_color": "#11161C",
   "theme_color": "#11161C",
-  "icons": [{"src":"/brand/hd-vag-parts-user-logo.jpg","sizes":"1408x768","type":"image/jpeg"}]
+  "icons": [{"src":"/brand/hd-vag-parts-user-logo-transparent-cropped.png","sizes":"2147x1389","type":"image/png"}]
 }
