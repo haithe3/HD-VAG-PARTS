@@ -14,6 +14,8 @@ import {
   Gauge,
   Hammer,
   Instagram,
+  Facebook,
+  Music2,
   MapPin,
   Menu,
   MessageCircle,
@@ -29,16 +31,29 @@ import {
 } from "lucide-react";
 import productsData from "./data/products.json";
 import compatibilityData from "./data/compatibility.json";
+import deliveryData from "./data/delivery.json";
+import packsData from "./data/packs.json";
+import { DISPLAY_PHONE, FACEBOOK_URL, GA_MEASUREMENT_ID, INSTAGRAM_URL, META_PIXEL_ID, SITE_URL, TIKTOK_URL, WHATSAPP_NUMBER } from "./config";
 
 type Lang = "fr" | "ar";
 type Product = (typeof productsData)[number];
 type CompatibilityRow = (typeof compatibilityData)[number];
 type CategoryKey = Product["category"] | "all";
 
-const WHATSAPP_NUMBER = "213540399326";
-const DISPLAY_PHONE = "0540 39 93 26";
-const HERO_IMAGE = "/manus-storage/async-images/VBl7plW3sxrVnHfet4JVdk/image-1.webp";
+const HERO_IMAGE = "/brand/hero.webp";
 const VIN_PATTERN = /^[A-HJ-NPR-Z0-9]{17}$/;
+
+const categoryImageSources = [
+  ["engine", "CHB-Evo Internal Combustion Engine Disassembled", "Markpedia1", "https://commons.wikimedia.org/wiki/File:CHB-Evo._Internal_Combustion_Engine_Disassembled.png", "CC BY 2.0"],
+  ["suspension", "A man working on a suspension", "Kwamitsey", "https://commons.wikimedia.org/wiki/File:A_man_working_on_a_suspension.jpg", "CC BY 4.0"],
+  ["cooling", "1913 Tacoma Speedway Stutz No 8 Radiator Detail", "Marvin Dement Boland", "https://commons.wikimedia.org/wiki/File:1913_Tacoma_Speedway_Stutz_No_8_Radiator_Detail_Marvin_D_Boland_Collection_G521013_(cropped).jpg", "Public domain"],
+  ["electrical", "Alternator Out", "dave_7", "https://commons.wikimedia.org/wiki/File:Alternator_Out_(16133831166).jpg", "CC BY 2.0"],
+  ["brakes", "Brake Discs", "Wikimedia Commons contributor", "https://commons.wikimedia.org/wiki/File:Brake_Discs.jpg", "CC BY 2.5"],
+  ["filters", "1970 Plymouth Barracuda airfilter detail", "Greg Gjerdingen", "https://commons.wikimedia.org/wiki/File:1970_Plymouth_Barracuda_-_airfilter_detail_-_15998487045_(cropped).jpg", "CC BY 2.0"],
+  ["transmission", "Austin Twelve gearbox", "Andy Dingley (scanner)", "https://commons.wikimedia.org/wiki/File:Austin_Twelve_gearbox_(Montagu,_Cars_and_Motor-Cycles,_1928).jpg", "Public domain"],
+  ["body", "DMC Delorean", "ilikewaffles11", "https://commons.wikimedia.org/wiki/File:DMC_Delorean_(16645278754).jpg", "CC BY 2.0"],
+  ["fluids", "Car Oil Change", "Tony Webster", "https://commons.wikimedia.org/wiki/File:Car_Oil_Change_(17218054110).jpg", "CC BY 2.0"],
+] as const;
 
 function normalizeVin(value: string) {
   return value.replace(/\s/g, "").toUpperCase();
@@ -50,8 +65,23 @@ function normalizeReference(value: string) {
 
 function brandFromWmi(vin: string, lang: Lang) {
   const wmi = vin.slice(0, 3);
-  const brands: Record<string, string> = { WVW: "Volkswagen", WVG: "Volkswagen", WAU: "Audi", WUA: "Audi", TMB: "Škoda", VSS: "SEAT" };
+  const brands: Record<string, string> = { WVW: "Volkswagen", WVG: "Volkswagen", WV1: "Volkswagen", WV2: "Volkswagen", "1VW": "Volkswagen", "3VW": "Volkswagen", AAV: "Volkswagen", WAU: "Audi", WUA: "Audi", TRU: "Audi", TMB: "Škoda", VSS: "SEAT" };
   return brands[wmi] || (lang === "fr" ? "Marque à confirmer" : "العلامة تحتاج تأكيد");
+}
+
+function canonicalBrandFromWmi(vin: string) {
+  const brands: Record<string, string> = { WVW: "Volkswagen", WVG: "Volkswagen", WV1: "Volkswagen", WV2: "Volkswagen", "1VW": "Volkswagen", "3VW": "Volkswagen", AAV: "Volkswagen", WAU: "Audi", WUA: "Audi", TRU: "Audi", TMB: "Škoda", VSS: "SEAT" };
+  return brands[vin.slice(0, 3)] || "";
+}
+
+function normalizedBrand(value: string) {
+  return value.toLowerCase().replace("škoda", "skoda").trim();
+}
+
+function trackWhatsAppClick() {
+  const w = window as Window & { gtag?: (...args: unknown[]) => void; fbq?: (...args: unknown[]) => void };
+  w.gtag?.("event", "whatsapp_click", { event_category: "Contact", event_label: "WhatsApp" });
+  w.fbq?.("track", "Contact", { channel: "WhatsApp" });
 }
 
 const categoryList: Array<{ key: CategoryKey; fr: string; ar: string; icon: typeof Fuel; short: string }> = [
@@ -67,7 +97,7 @@ const categoryList: Array<{ key: CategoryKey; fr: string; ar: string; icon: type
 
 const copy = {
   fr: {
-    nav: { home: "Accueil", catalog: "Catalogue", find: "Trouver ma pièce", compatibility: "Vérifier compatibilité", how: "Comment ça marche", policy: "Livraison & retours", contact: "Contact" },
+    nav: { home: "Accueil", catalog: "Catalogue", find: "Trouver ma pièce", compatibility: "Vérifier compatibilité", how: "Comment ça marche", policy: "Livraison & retours", about: "À propos", contact: "Contact" },
     kicker: "PIÈCES VAG · ALGÉRIE",
     heroTitle: "Pièces VAG fiables, livrées partout en Algérie.",
     heroText: "Envoyez votre VIN. Nous vérifions la bonne référence, confirmons le prix et organisons la livraison dans votre wilaya.",
@@ -83,13 +113,13 @@ const copy = {
       ["01", "Vérification sur VIN", "Votre numéro de châssis aide à confirmer la compatibilité avant de commander."],
       ["02", "Référence claire", "Original, OEM ou Aftermarket : le niveau de qualité est indiqué à chaque fois."],
       ["03", "Sourcing à la demande", "Nous cherchons la pièce auprès de notre boutique partenaire selon votre besoin."],
-      ["04", "Livraison nationale", "On livre partout en Algérie, avec suivi du dépôt jusqu’à la réception."],
+      ["04", "Livraison nationale", "Livraison dans toutes les wilayas."],
     ],
     deliveryTitle: "Un doute sur la pièce ? On regarde avec vous.",
     deliveryText: "Envoyez le VIN, une photo si vous l’avez et votre wilaya. Nous revenons vers vous sur WhatsApp avec la référence et le prix.",
     deliveryCta: "Décrire ma demande",
-    catalogTitle: "Catalogue de démonstration",
-    catalogText: "Les photos et références ci-dessous sont des placeholders à remplacer par vos vrais produits.",
+    catalogTitle: "Catalogue pièces VAG",
+    catalogText: "Choisissez une catégorie ou envoyez votre référence sur WhatsApp pour vérification.",
     order: "Commander sur WhatsApp",
     reference: "Réf.",
     compatible: "Compatible avec",
@@ -126,7 +156,12 @@ const copy = {
       ["04", "Livraison", "Votre commande part vers votre wilaya, avec les informations de réception."],
     ],
     policyTitle: "Livraison & retours",
-    policyText: "Une base claire, à ajuster selon votre fonctionnement.",
+    policyText: "Les conditions sont confirmées avec vous avant la commande.",
+    aboutTitle: "À propos de HD VAG PARTS",
+    aboutText: "Nous aidons les automobilistes en Algérie à trouver des pièces VAG avec une vérification simple par VIN et une commande directe sur WhatsApp.",
+    packsTitle: "Packs entretien",
+    packsText: "Des ensembles à confirmer selon votre modèle et votre moteur.",
+    commitments: ["On vérifie avant de commander", "Qualité indiquée clairement (Original / OEM / Aftermarket)", "Réponse rapide sur WhatsApp"],
     contactTitle: "Parlons de votre véhicule.",
     contactText: "Un message WhatsApp suffit pour commencer. Réponse simple, sans jargon inutile.",
     openWhatsApp: "Ouvrir WhatsApp",
@@ -134,7 +169,7 @@ const copy = {
     footerLine: "Pièces VAG fiables · Livraison dans toutes les wilayas · Commande par WhatsApp",
   },
   ar: {
-    nav: { home: "الرئيسية", catalog: "الكتالوج", find: "أبحث عن قطعة", compatibility: "تحقق من التوافق", how: "كيف نعمل", policy: "التوصيل والإرجاع", contact: "اتصل بنا" },
+    nav: { home: "الرئيسية", catalog: "الكتالوج", find: "أبحث عن قطعة", compatibility: "تحقق من التوافق", how: "كيف نعمل", policy: "التوصيل والإرجاع", about: "من نحن", contact: "اتصل بنا" },
     kicker: "قطع VAG · الجزائر",
     heroTitle: "قطع VAG موثوقة، والتوصيل إلى كل ولايات الجزائر.",
     heroText: "أرسل رقم الشاسيه. نتحقق من المرجع الصحيح، نؤكد السعر، ونرتب التوصيل إلى ولايتك.",
@@ -150,13 +185,13 @@ const copy = {
       ["01", "تأكيد عبر VIN", "رقم الشاسيه يساعدنا نتأكد من التوافق قبل الطلب."],
       ["02", "مرجع واضح", "Original أو OEM أو Aftermarket: الجودة مكتوبة بوضوح."],
       ["03", "توفير حسب الطلب", "نبحث عن القطعة عند شريكنا حسب حاجتك."],
-      ["04", "توصيل وطني", "نوصل لكل ولايات الجزائر ونتابع الطلب حتى الاستلام."],
+      ["04", "توصيل وطني", "التوصيل إلى كل الولايات."],
     ],
     deliveryTitle: "ماكش متأكد من القطعة؟ نشوفوها معاك.",
     deliveryText: "أرسل رقم الشاسيه، صورة إذا كانت عندك والولاية. نرجعولك على واتساب بالمرجع والسعر.",
     deliveryCta: "اشرح طلبي",
-    catalogTitle: "كتالوج تجريبي",
-    catalogText: "الصور والمراجع هنا مؤقتة. بدّلها بمنتجاتك الحقيقية.",
+    catalogTitle: "كتالوج قطع VAG",
+    catalogText: "اختار الفئة أو ابعث المرجع عبر واتساب باش نتحققوا منه.",
     order: "اطلب عبر واتساب",
     reference: "المرجع",
     compatible: "متوافق مع",
@@ -193,7 +228,12 @@ const copy = {
       ["04", "التوصيل", "الطلب يروح لولايتك مع معلومات الاستلام."],
     ],
     policyTitle: "التوصيل والإرجاع",
-    policyText: "نص أساسي تقدر تعدلو حسب طريقة خدمتك.",
+    policyText: "الشروط تتأكد معاك قبل الطلب.",
+    aboutTitle: "على HD VAG PARTS",
+    aboutText: "نعاونو أصحاب السيارات في الجزائر يلقاو قطع VAG بالتحقق عبر VIN والطلب المباشر على واتساب.",
+    packsTitle: "باقات الصيانة",
+    packsText: "باقات تتأكد حسب الموديل والمحرك تاع سيارتك.",
+    commitments: ["نتأكدوا قبل الطلب", "الجودة مكتوبة بوضوح (Original / OEM / Aftermarket)", "رد سريع عبر واتساب"],
     contactTitle: "احكيلنا على سيارتك.",
     contactText: "رسالة واتساب تكفي باش نبدأو. جواب واضح وبدون تعقيد.",
     openWhatsApp: "افتح واتساب",
@@ -216,7 +256,32 @@ function useSeo(lang: Lang, title: string, description: string) {
     if (ogTitle) ogTitle.setAttribute("content", `${title} — HD VAG PARTS`);
     const ogDescription = document.querySelector('meta[property="og:description"]');
     if (ogDescription) ogDescription.setAttribute("content", description);
+    let canonical = document.querySelector('link[rel="canonical"]');
+    if (!canonical) { canonical = document.createElement("link"); canonical.setAttribute("rel", "canonical"); document.head.appendChild(canonical); }
+    canonical.setAttribute("href", SITE_URL ? `${SITE_URL}${window.location.pathname}` : window.location.pathname);
+    const image = SITE_URL ? `${SITE_URL}/brand/hd-vag-parts-user-logo-transparent-cropped.png` : "/brand/hd-vag-parts-user-logo-transparent-cropped.png";
+    document.querySelector('meta[property="og:image"]')?.setAttribute("content", image);
+    document.querySelector('meta[name="twitter:image"]')?.setAttribute("content", image);
   }, [lang, title, description]);
+}
+
+function useAnalytics() {
+  useEffect(() => {
+    if (GA_MEASUREMENT_ID) {
+      const script = document.createElement("script");
+      script.async = true;
+      script.src = `https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`;
+      document.head.appendChild(script);
+      const inline = document.createElement("script");
+      inline.text = `window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','${GA_MEASUREMENT_ID}');`;
+      document.head.appendChild(inline);
+    }
+    if (META_PIXEL_ID) {
+      const script = document.createElement("script");
+      script.text = `!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');fbq('init','${META_PIXEL_ID}');fbq('track','PageView');`;
+      document.head.appendChild(script);
+    }
+  }, []);
 }
 
 function Logo({ compact = false }: { compact?: boolean }) {
@@ -238,6 +303,7 @@ function Header({ lang, setLang }: { lang: Lang; setLang: (lang: Lang) => void }
     ["/verifier-compatibilite", t.nav.compatibility],
     ["/comment-ca-marche", t.nav.how],
     ["/livraison-retours", t.nav.policy],
+    ["/a-propos", t.nav.about],
     ["/contact", t.nav.contact],
   ];
   return (
@@ -263,24 +329,26 @@ function Header({ lang, setLang }: { lang: Lang; setLang: (lang: Lang) => void }
 
 function WhatsAppFloat({ lang }: { lang: Lang }) {
   const t = copy[lang];
-  return <a className="whatsapp-float" href={whatsappUrl(lang === "fr" ? "Bonjour HD VAG PARTS, je cherche une pièce pour mon véhicule." : "السلام عليكم HD VAG PARTS، نبحث عن قطعة لسيارتي.")} target="_blank" rel="noreferrer" aria-label={t.openWhatsApp}><MessageCircle size={23} /><span>{t.openWhatsApp}</span></a>;
+  return <a className="whatsapp-float" href={whatsappUrl(lang === "fr" ? "Bonjour HD VAG PARTS, je cherche une pièce pour mon véhicule." : "السلام عليكم HD VAG PARTS، نبحث عن قطعة لسيارتي.")} onClick={trackWhatsAppClick} target="_blank" rel="noreferrer" aria-label={t.openWhatsApp}><MessageCircle size={23} /><span>{t.openWhatsApp}</span></a>;
 }
 
 function Footer({ lang }: { lang: Lang }) {
   const t = copy[lang];
-  return <footer className="site-footer"><div className="container footer-grid"><div><Logo /><p className="footer-description">{t.footerLine}.</p></div><div className="footer-links"><span>{t.nav.catalog}</span><Link href="/catalogue">{t.catalogTitle}</Link><Link href="/trouver-ma-piece">{t.nav.find}</Link></div><div className="footer-links"><span>{t.nav.contact}</span><a href={whatsappUrl("Bonjour HD VAG PARTS")}>WhatsApp</a><a href="tel:+213540399326">{DISPLAY_PHONE}</a><span>Algerie · Toutes les wilayas</span></div></div><div className="container footer-bottom"><span>© {new Date().getFullYear()} HD VAG PARTS</span><span>VAG · ALGÉRIE</span></div></footer>;
+  return <footer className="site-footer"><div className="container footer-grid"><div><Logo /><p className="footer-description">{t.footerLine}.</p><div className="social-links">{INSTAGRAM_URL && <a href={INSTAGRAM_URL} target="_blank" rel="noreferrer" aria-label="Instagram"><Instagram size={17} /></a>}{FACEBOOK_URL && <a href={FACEBOOK_URL} target="_blank" rel="noreferrer" aria-label="Facebook"><Facebook size={17} /></a>}{TIKTOK_URL && <a href={TIKTOK_URL} target="_blank" rel="noreferrer" aria-label="TikTok"><Music2 size={17} /></a>}</div></div><div className="footer-links"><span>{t.nav.catalog}</span><Link href="/catalogue">{t.catalogTitle}</Link><Link href="/trouver-ma-piece">{t.nav.find}</Link><Link href="/a-propos">{t.nav.about}</Link></div><div className="footer-links"><span>{t.nav.contact}</span><a href={whatsappUrl("Bonjour HD VAG PARTS")} onClick={trackWhatsAppClick}>WhatsApp</a><a href={`tel:+${WHATSAPP_NUMBER}`}>{DISPLAY_PHONE}</a><span>Algérie · Toutes les wilayas</span></div></div><div className="container footer-bottom"><span>© {new Date().getFullYear()} HD VAG PARTS</span><span>VAG · ALGÉRIE</span></div></footer>;
 }
 
 function Shell({ lang, setLang, children }: { lang: Lang; setLang: (lang: Lang) => void; children: React.ReactNode }) {
+  useAnalytics();
   return <div dir={lang === "ar" ? "rtl" : "ltr"} className={`app-shell ${lang === "ar" ? "rtl" : ""}`}><Header lang={lang} setLang={setLang} /><main>{children}</main><Footer lang={lang} /><WhatsAppFloat lang={lang} /></div>;
 }
 
 function Eyebrow({ children }: { children: React.ReactNode }) { return <div className="eyebrow"><span className="eyebrow-line" />{children}</div>; }
 
 function ProductVisual({ product }: { product: Product }) {
-  const iconMap: Record<string, typeof Fuel> = { filters: Fuel, brakes: Gauge, engine: Zap, suspension: CarFront, electrical: Sparkles, fluids: Fuel, body: Hammer };
+  const iconMap: Record<string, typeof Fuel> = { filters: Fuel, brakes: Gauge, engine: Zap, suspension: CarFront, cooling: Fuel, electrical: Sparkles, fluids: Fuel, transmission: Gauge, body: Hammer };
   const Icon = iconMap[product.category] || Sparkles;
-  return <div className={`product-visual ${product.category}`}><div className="visual-grid" /><Icon size={40} strokeWidth={1.3} /><span>PLACEHOLDER</span><small>PHOTO</small></div>;
+  if (product.image.startsWith("/")) return <div className={`product-visual ${product.category} has-image`}><img src={product.image} alt={product.name} loading="lazy" /></div>;
+  return <div className={`product-visual ${product.category} has-image illustrative-image`}><img src={`/categories/${product.category}.webp`} alt={`${product.category} — image illustrative`} loading="lazy" /><span className="illustrative-label">{document.documentElement.dir === "rtl" ? "صورة توضيحية" : "Image illustrative"}</span></div>;
 }
 
 function CompatibilityTool({ lang }: { lang: Lang }) {
@@ -318,7 +386,8 @@ function CompatibilityTool({ lang }: { lang: Lang }) {
     ? `Bonjour HD VAG PARTS, pouvez-vous vérifier la référence ${normalizedReference} avec mon VIN ${normalizedVin} ?`
     : `السلام عليكم HD VAG PARTS، تقدروا تتحققوا من المرجع ${normalizedReference} مع VIN ${normalizedVin}؟`;
 
-  return <section id="verifier-compatibilite" className="section compatibility-section"><div className="container compatibility-layout"><div className="compatibility-intro"><Eyebrow>{lang === "fr" ? "VIN · RÉFÉRENCE OEM" : "VIN · مرجع OEM"}</Eyebrow><h2>{t.compatibilityTitle}</h2><p>{t.compatibilityText}</p><div className="compatibility-note"><ShieldCheck size={18} /><span>{lang === "fr" ? "Nous ne décodons pas le modèle ou le moteur à partir du VIN seul." : "ما نفككوش الموديل أو المحرك من VIN وحده."}</span></div></div><form className="compatibility-card" onSubmit={check} noValidate><div className="compatibility-fields"><label className="form-field"><span>{t.vinLabel}<b> *</b></span><input value={vin} onChange={(event) => setVin(event.target.value.toUpperCase())} placeholder="WVWZZZ1KZ9W000000" maxLength={19} autoComplete="off" aria-invalid={Boolean(error)} /></label><label className="form-field"><span>{t.partReferenceLabel}<b> *</b></span><input value={reference} onChange={(event) => setReference(event.target.value.toUpperCase())} placeholder="1K0 698 151" autoComplete="off" /></label></div>{detectedBrand && <p className="wmi-badge"><BadgeCheck size={16} /><span>{t.brandDetected}: <strong>{detectedBrand}</strong></span></p>}{error && <p className="compatibility-error" role="alert"><X size={16} />{error}</p>}<button className="button button-primary compatibility-submit" type="submit">{t.checkCompatibility}<ArrowRight size={17} /></button>{result !== undefined && <div className={`compatibility-result ${result ? "is-found" : "is-not-found"}`} role="status">{result ? <><div className="result-heading"><CircleCheck size={19} /><strong>{t.foundResult}</strong></div><h3>{result.partName}</h3><p><b>{t.partReferenced}:</b> {result.compatibleModels}.</p><p><b>{lang === "fr" ? "Années" : "السنوات"}:</b> {result.years}</p><p className="result-confirmation">{lang === "fr" ? `Pièce référencée pour: ${result.compatibleModels}. ${t.finalConfirmation}` : `${t.partReferenced}: ${result.compatibleModels}. ${t.finalConfirmation}`}</p><button type="button" className="button button-dark" onClick={() => openWhatsApp(foundMessage)}>{t.orderPart}<MessageCircle size={17} /></button></> : <><div className="result-heading"><Search size={19} /><strong>{t.notFoundResult}</strong></div><p>{lang === "fr" ? "Nous vérifions la référence avec votre VIN avant toute commande." : "نتحقق من المرجع مع VIN تاعك قبل أي طلب."}</p><button type="button" className="button button-dark" onClick={() => openWhatsApp(notFoundMessage)}>{t.verifyOnWhatsApp}<MessageCircle size={17} /></button></>}</div>}<p className="compatibility-footnote">{t.resultNote}</p></form></div></section>;
+  const brandMismatch = Boolean(result && result.brand && canonicalBrandFromWmi(normalizedVin) && normalizedBrand(result.brand) !== normalizedBrand(canonicalBrandFromWmi(normalizedVin)));
+  return <section id="verifier-compatibilite" className="section compatibility-section"><div className="container compatibility-layout"><div className="compatibility-intro"><Eyebrow>{lang === "fr" ? "VIN · RÉFÉRENCE OEM" : "VIN · مرجع OEM"}</Eyebrow><h2>{t.compatibilityTitle}</h2><p>{t.compatibilityText}</p><div className="compatibility-note"><ShieldCheck size={18} /><span>{lang === "fr" ? "Nous ne décodons pas le modèle ou le moteur à partir du VIN seul." : "ما نفككوش الموديل أو المحرك من VIN وحده."}</span></div></div><form className="compatibility-card" onSubmit={check} noValidate><div className="compatibility-fields"><label className="form-field"><span>{t.vinLabel}<b> *</b></span><input value={vin} onChange={(event) => setVin(event.target.value.toUpperCase())} placeholder="WVWZZZ1KZ9W000000" maxLength={19} autoComplete="off" aria-invalid={Boolean(error)} /></label><label className="form-field"><span>{t.partReferenceLabel}<b> *</b></span><input value={reference} onChange={(event) => setReference(event.target.value.toUpperCase())} placeholder="1K0 698 151" autoComplete="off" /></label></div>{detectedBrand && <p className="wmi-badge"><BadgeCheck size={16} /><span>{t.brandDetected}: <strong>{detectedBrand}</strong></span></p>}{error && <p className="compatibility-error" role="alert"><X size={16} />{error}</p>}<button className="button button-primary compatibility-submit" type="submit">{t.checkCompatibility}<ArrowRight size={17} /></button>{result !== undefined && <div className={`compatibility-result ${result ? "is-found" : "is-not-found"}`} role="status">{result ? <><div className="result-heading"><CircleCheck size={19} /><strong>{t.foundResult}</strong></div>{brandMismatch && <p className="brand-warning"><ShieldCheck size={16} />{lang === "fr" ? "La marque du VIN ne correspond pas à cette référence. Vérification manuelle sur WhatsApp recommandée." : "علامة VIN ما تطابقش هاد المرجع. ننصحو بالتحقق اليدوي عبر واتساب."}</p>}<h3>{result.partName}</h3><p><b>{t.partReferenced}:</b> {result.compatibleModels}.</p><p><b>{lang === "fr" ? "Années" : "السنوات"}:</b> {result.years}</p><p className="result-confirmation">{lang === "fr" ? `Pièce référencée pour: ${result.compatibleModels}. ${t.finalConfirmation}` : `${t.partReferenced}: ${result.compatibleModels}. ${t.finalConfirmation}`}</p><button type="button" className="button button-dark" onClick={() => { trackWhatsAppClick(); openWhatsApp(foundMessage); }}>{t.orderPart}<MessageCircle size={17} /></button></> : <><div className="result-heading"><Search size={19} /><strong>{t.notFoundResult}</strong></div><p>{lang === "fr" ? "Nous vérifions la référence avec votre VIN avant toute commande." : "نتحقق من المرجع مع VIN تاعك قبل أي طلب."}</p><button type="button" className="button button-dark" onClick={() => { trackWhatsAppClick(); openWhatsApp(notFoundMessage); }}>{t.verifyOnWhatsApp}<MessageCircle size={17} /></button></>}</div>}<p className="compatibility-footnote">{t.resultNote}</p></form></div></section>;
 }
 
 function Home({ lang }: { lang: Lang }) {
@@ -328,7 +397,7 @@ function Home({ lang }: { lang: Lang }) {
     <section className="hero-section"><div className="hero-image" style={{ backgroundImage: `url(${HERO_IMAGE})` }} /><div className="hero-overlay" /><div className="container hero-content"><div className="hero-copy"><Eyebrow>{t.kicker}</Eyebrow><h1>{t.heroTitle}</h1><p>{t.heroText}</p><div className="hero-actions"><Link href="/trouver-ma-piece" className="button button-primary">{t.heroPrimary}<ArrowRight size={17} /></Link><Link href="/catalogue" className="button button-ghost">{t.heroSecondary}<ArrowDownRight size={17} /></Link></div><div className="hero-trust"><ShieldCheck size={17} /><span>{t.trust}</span></div></div><div className="hero-stamp"><span>HD</span><small>VAG<br />PARTS</small></div></div></section>
     <section className="ticker"><div className="container ticker-inner"><span>VIN FIRST</span><span>•</span><span>VÉRIFICATION</span><span>•</span><span>PRIX CONFIRMÉ</span><span>•</span><span>LIVRAISON ALGÉRIE</span></div></section>
     <CompatibilityTool lang={lang} />
-    <section className="section categories-section"><div className="container"><div className="section-head"><div><Eyebrow>{t.sectionEyebrow}</Eyebrow><h2>{t.categoriesTitle}</h2></div><p>{t.categoriesText}</p></div><div className="category-grid">{categoryList.filter((category) => category.key !== "all").map((category, index) => { const Icon = category.icon; return <Link href={`/catalogue?cat=${category.key}`} className="category-card" key={category.key}><span className="category-number">0{index + 1}</span><Icon size={28} /><strong>{lang === "fr" ? category.fr : category.ar}</strong><span className="category-arrow"><ArrowUpRightIcon /></span></Link>; })}</div></div></section>
+    <section className="section categories-section"><div className="container"><div className="section-head"><div><Eyebrow>{t.sectionEyebrow}</Eyebrow><h2>{t.categoriesTitle}</h2></div><p>{t.categoriesText}</p></div><div className="category-grid">{categoryList.filter((category) => category.key !== "all").map((category, index) => { const Icon = category.icon; return <Link href={`/catalogue?cat=${category.key}`} className="category-card" key={category.key}><span className="category-number">0{index + 1}</span><Icon size={28} /><strong>{lang === "fr" ? category.fr : category.ar}</strong><span className="category-arrow"><ArrowUpRightIcon /></span></Link>; })}</div><Packs lang={lang} /></div></section>
     <section className="section dark-section why-section"><div className="container"><div className="section-head light"><div><Eyebrow>{lang === "fr" ? "POURQUOI HD VAG PARTS" : "لماذا HD VAG PARTS"}</Eyebrow><h2>{t.whyTitle}</h2></div><p>{t.whyText}</p></div><div className="why-grid">{t.whyCards.map(([number, title, text]) => <div className="why-card" key={number}><span className="why-number">{number}</span><div><h3>{title}</h3><p>{text}</p></div></div>)}</div></div></section>
     <section className="section delivery-section"><div className="container delivery-panel"><div className="delivery-icon"><Truck size={32} /></div><div><Eyebrow>{lang === "fr" ? "LIVRAISON NATIONALE" : "التوصيل الوطني"}</Eyebrow><h2>{t.deliveryTitle}</h2><p>{t.deliveryText}</p></div><Link href="/trouver-ma-piece" className="button button-dark">{t.deliveryCta}<ArrowRight size={17} /></Link></div></section>
   </>;
@@ -343,18 +412,28 @@ function CategoryPills({ lang, active, setActive }: { lang: Lang; active: Catego
 function ProductCard({ lang, product }: { lang: Lang; product: Product }) {
   const t = copy[lang];
   const message = lang === "fr" ? `Bonjour HD VAG PARTS, je souhaite commander : ${product.name}, référence ${product.reference}. Mon véhicule : ` : `السلام عليكم، أريد طلب القطعة: ${product.name}، المرجع ${product.reference}. السيارة: `;
-  return <article className="product-card"><ProductVisual product={product} /><div className="product-body"><div className="product-topline"><span className={`quality quality-${product.quality.toLowerCase()}`}>{product.quality}</span><span className="product-ref">{t.reference} {product.reference}</span></div><h3>{product.name}</h3><p className="product-compatible"><span>{t.compatible}</span> {product.compatible}</p><div className="product-footer"><strong>{product.price}</strong><a className="product-order" href={whatsappUrl(message)} target="_blank" rel="noreferrer"><MessageCircle size={16} />{t.order}</a></div></div></article>;
+  return <article className="product-card"><ProductVisual product={product} /><div className="product-body"><div className="product-topline"><span className={`quality quality-${product.quality.toLowerCase()}`}>{product.quality}</span><span className="product-ref">{t.reference} {product.reference}</span></div><h3>{product.name}</h3><p className="product-compatible"><span>{t.compatible}</span> {product.compatible}</p><div className="product-footer"><strong>{product.price}</strong><a className="product-order" href={whatsappUrl(message)} onClick={trackWhatsAppClick} target="_blank" rel="noreferrer"><MessageCircle size={16} />{t.order}</a></div></div></article>;
+}
+
+function Packs({ lang }: { lang: Lang }) {
+  const t = copy[lang];
+  return <section className="packs-section"><div className="section-head"><div><Eyebrow>{lang === "fr" ? "ENTRETIEN" : "الصيانة"}</Eyebrow><h2>{t.packsTitle}</h2></div><p>{t.packsText}</p></div><div className="packs-grid">{packsData.map((pack) => { const message = lang === "fr" ? `Bonjour HD VAG PARTS, je souhaite vérifier le ${pack.name} pour ${pack.vehicle}. Prix : ${pack.price}.` : `السلام عليكم HD VAG PARTS، نحب نتحقق من ${pack.name} لسيارة ${pack.vehicle}. السعر: ${pack.price}.`; return <article className="pack-card" key={pack.id}><div className="product-topline"><span className={`quality quality-${pack.quality.toLowerCase()}`}>{pack.quality}</span><span className="placeholder-chip">PLACEHOLDER</span></div><h3>{pack.name}</h3><p className="pack-vehicle">{pack.vehicle}</p><ul>{pack.contents.map((item) => <li key={item}>{item}</li>)}</ul><div className="product-footer"><strong>{pack.price}</strong><a className="product-order" href={whatsappUrl(message)} onClick={trackWhatsAppClick} target="_blank" rel="noreferrer"><MessageCircle size={16} />{t.order}</a></div></article>; })}</div></section>;
 }
 
 function Catalog({ lang }: { lang: Lang }) {
   const t = copy[lang];
+  const [location] = useLocation();
   const query = typeof window !== "undefined" ? new URLSearchParams(window.location.search) : null;
   const initialCategory = (query?.get("cat") as CategoryKey) || "all";
   const [active, setActive] = useState<CategoryKey>(categoryList.some((item) => item.key === initialCategory) ? initialCategory : "all");
   const [search, setSearch] = useState("");
+  useEffect(() => {
+    const next = new URLSearchParams(window.location.search).get("cat") as CategoryKey;
+    setActive(categoryList.some((item) => item.key === next) ? next : "all");
+  }, [location]);
   useSeo(lang, t.catalogTitle, t.catalogText);
   const filtered = useMemo(() => productsData.filter((product) => (active === "all" || product.category === active) && `${product.name} ${product.reference} ${product.compatible}`.toLowerCase().includes(search.toLowerCase())), [active, search]);
-  return <section className="page-section"><div className="container"><div className="page-intro"><Eyebrow>{t.kicker}</Eyebrow><h1>{t.catalogTitle}</h1><p>{t.catalogText}</p></div><div className="catalog-toolbar"><CategoryPills lang={lang} active={active} setActive={setActive} /><label className="search-box"><Search size={18} /><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder={lang === "fr" ? "Rechercher une pièce ou une référence" : "ابحث عن قطعة أو مرجع"} /></label></div><div className="placeholder-note"><Sparkles size={17} /><span>{lang === "fr" ? "Produits de démonstration — remplacez les photos, noms, références et prix dans products.json." : "منتجات تجريبية — بدّل الصور والأسماء والمراجع والأسعار في ملف products.json."}</span></div><div className="product-grid">{filtered.map((product) => <ProductCard key={product.id} lang={lang} product={product} />)}</div>{filtered.length === 0 && <div className="empty-state"><Search size={30} /><h3>{lang === "fr" ? "Aucun résultat" : "لا توجد نتائج"}</h3><p>{lang === "fr" ? "Essayez une autre référence ou contactez-nous sur WhatsApp." : "جرب مرجع آخر أو تواصل معنا عبر واتساب."}</p></div>}</div></section>;
+  return <section className="page-section"><div className="container"><div className="page-intro"><Eyebrow>{t.kicker}</Eyebrow><h1>{t.catalogTitle}</h1><p>{t.catalogText}</p></div><div className="catalog-toolbar"><CategoryPills lang={lang} active={active} setActive={setActive} /><label className="search-box"><Search size={18} /><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder={lang === "fr" ? "Rechercher une pièce ou une référence" : "ابحث عن قطعة أو مرجع"} /></label></div><div className="product-grid">{filtered.map((product) => <ProductCard key={product.id} lang={lang} product={product} />)}</div><Packs lang={lang} />{filtered.length === 0 && <div className="empty-state"><Search size={30} /><h3>{lang === "fr" ? "Aucun résultat" : "لا توجد نتائج"}</h3><p>{lang === "fr" ? "Essayez une autre référence ou contactez-nous sur WhatsApp." : "جرب مرجع آخر أو تواصل معنا عبر واتساب."}</p></div>}</div></section>;
 }
 
 function Field({ label, name, required = false, children, type = "text", placeholder }: { label: string; name: string; required?: boolean; children?: React.ReactNode; type?: string; placeholder?: string }) {
@@ -384,6 +463,18 @@ function HowItWorks({ lang }: { lang: Lang }) {
   return <section className="page-section"><div className="container"><div className="page-intro"><Eyebrow>{lang === "fr" ? "LE PARCOURS HD VAG PARTS" : "طريقة HD VAG PARTS"}</Eyebrow><h1>{t.howTitle}</h1><p>{t.howText}</p></div><div className="steps-grid">{t.howSteps.map(([number, title, text], index) => <div className="step-card" key={number}><span className="step-number">{number}</span><div className="step-icon">{index === 0 ? <FileText /> : index === 1 ? <ShieldCheck /> : index === 2 ? <PackageCheck /> : <Truck />}</div><h2>{title}</h2><p>{text}</p>{index < 3 && <ArrowRight className="step-arrow" size={20} />}</div>)}</div><div className="how-bottom"><div><Clock3 size={18} /><strong>{lang === "fr" ? "Réponse sur WhatsApp" : "الرد عبر واتساب"}</strong></div><span>{lang === "fr" ? "Les délais dépendent de la disponibilité de la pièce chez notre partenaire." : "المدة تتعلق بتوفر القطعة عند شريكنا."}</span></div></div></section>;
 }
 
+function About({ lang }: { lang: Lang }) {
+  const t = copy[lang];
+  useSeo(lang, t.aboutTitle, t.aboutText);
+  return <section className="page-section about-page"><div className="container about-layout"><div className="page-intro"><Eyebrow>{lang === "fr" ? "NOTRE APPROCHE" : "طريقتنا"}</Eyebrow><h1>{t.aboutTitle}</h1><p>{t.aboutText}</p><div className="commitments-grid">{t.commitments.map((item, index) => <article key={item}><span>0{index + 1}</span><BadgeCheck size={20} /><h2>{item}</h2></article>)}</div></div><div className="about-photo"><CarFront size={44} /><span>{lang === "fr" ? "Photo de l'équipe ou de la boutique — à ajouter" : "صورة الفريق أو المحل — تضاف لاحقاً"}</span></div></div></section>;
+}
+
+function DeliveryTable({ lang }: { lang: Lang }) {
+  const [search, setSearch] = useState("");
+  const rows = deliveryData.filter((row) => row.wilaya.toLowerCase().includes(search.toLowerCase()));
+  return <div className="delivery-table-wrap"><div className="delivery-search"><Search size={17} /><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder={lang === "fr" ? "Rechercher une wilaya" : "ابحث عن ولاية"} /></div><div className="delivery-table-scroll"><table><thead><tr><th>{lang === "fr" ? "Wilaya" : "الولاية"}</th><th>{lang === "fr" ? "Prix" : "السعر"}</th><th>{lang === "fr" ? "Délai" : "المدة"}</th></tr></thead><tbody>{rows.map((row) => <tr key={row.wilaya}><td>{row.wilaya}</td><td>{row.price}</td><td>{row.delay}</td></tr>)}</tbody></table></div></div>;
+}
+
 function Policies({ lang }: { lang: Lang }) {
   const t = copy[lang];
   useSeo(lang, t.policyTitle, t.policyText);
@@ -398,13 +489,13 @@ function Policies({ lang }: { lang: Lang }) {
     ["التأكد قبل الطلب", "قبل ما نأكدو، نبعثولك المرجع، نوع الجودة المتوفر (Original / OEM / Aftermarket) والسعر المتفق عليه."],
     ["الإرجاع", "الإرجاع يدرس حالة بحالة. القطعة الخاصة، المركبة أو المتضررة ممكن ما تتبدلش. تواصل معنا بسرعة مع الصور ومرجع الطلب."],
   ];
-  return <section className="page-section policy-page"><div className="container narrow-container"><div className="page-intro"><Eyebrow>{t.kicker}</Eyebrow><h1>{t.policyTitle}</h1><p>{t.policyText}</p></div><div className="policy-list">{sections.map(([title, text], index) => <article key={title}><span>0{index + 1}</span><div><h2>{title}</h2><p>{text}</p></div></article>)}</div><div className="editable-note"><Sparkles size={18} /><div><strong>{lang === "fr" ? "Texte éditable" : "نص قابل للتعديل"}</strong><p>{lang === "fr" ? "Retrouvez ce contenu dans `client/src/App.tsx`, section Policies, pour adapter les conditions de votre entreprise." : "تقدر تبدل هذا النص في ملف App.tsx، قسم Policies، حسب طريقة خدمتك."}</p></div></div></div></section>;
+  return <section className="page-section policy-page"><div className="container narrow-container"><div className="page-intro"><Eyebrow>{t.kicker}</Eyebrow><h1>{t.policyTitle}</h1><p>{t.policyText}</p></div><div className="policy-list">{sections.map(([title, text], index) => <article key={title}><span>0{index + 1}</span><div><h2>{title}</h2><p>{text}</p></div></article>)}</div><div className="delivery-table-section"><Eyebrow>{lang === "fr" ? "LES 58 WILAYAS" : "58 ولاية"}</Eyebrow><h2>{lang === "fr" ? "Livraison par wilaya" : "التوصيل حسب الولاية"}</h2><p>{lang === "fr" ? "Prix et délais à confirmer avec vous avant la commande." : "السعر والمدة يتأكدو معاك قبل الطلب."}</p><DeliveryTable lang={lang} /></div><div className="image-sources-section"><Eyebrow>{lang === "fr" ? "CRÉDITS VISUELS" : "مصادر الصور"}</Eyebrow><h2>{lang === "fr" ? "Sources des images" : "مصادر الصور"}</h2><p>{lang === "fr" ? "Ces images sont illustratives et proviennent de Wikimedia Commons. Chaque licence autorise la réutilisation selon ses conditions." : "هذه الصور توضيحية ومأخوذة من Wikimedia Commons. كل ترخيص يسمح بإعادة الاستعمال حسب شروطه."}</p><div className="image-sources-list">{categoryImageSources.map(([category, title, author, url, license]) => <div className="image-source-row" key={category}><strong>{category}</strong><span>{title} — {author}</span><a href={url} target="_blank" rel="noreferrer">{license}</a></div>)}</div></div></div></section>;
 }
 
 function Contact({ lang }: { lang: Lang }) {
   const t = copy[lang];
   useSeo(lang, t.contactTitle, t.contactText);
-  return <section className="page-section contact-page"><div className="container contact-layout"><div className="page-intro"><Eyebrow>{t.kicker}</Eyebrow><h1>{t.contactTitle}</h1><p>{t.contactText}</p><div className="contact-actions"><a className="button button-primary" href={whatsappUrl(lang === "fr" ? "Bonjour HD VAG PARTS, je souhaite un conseil pour une pièce." : "السلام عليكم HD VAG PARTS، أريد نصيحة حول قطعة.")} target="_blank" rel="noreferrer"><MessageCircle size={18} />{t.openWhatsApp}</a><a className="button button-outline" href={`tel:+${WHATSAPP_NUMBER}`}><Phone size={18} />{t.callUs}</a></div></div><div className="contact-card"><div className="contact-card-top"><span className="status-dot" />{lang === "fr" ? "Canal principal" : "القناة الرئيسية"}</div><div className="contact-icon"><MessageCircle size={40} /></div><h2>WhatsApp</h2><a href={`tel:+${WHATSAPP_NUMBER}`} className="contact-number">{DISPLAY_PHONE}</a><p>{lang === "fr" ? "Envoyez votre VIN, votre modèle et votre wilaya. Nous vous répondons dès que possible." : "أرسل رقم الشاسيه، الموديل والولاية. نجاوبوك في أقرب وقت."}</p><div className="contact-meta"><span><MapPin size={15} />Algérie</span><span><Truck size={15} />Toutes les wilayas</span></div></div></div></section>;
+  return <section className="page-section contact-page"><div className="container contact-layout"><div className="page-intro"><Eyebrow>{t.kicker}</Eyebrow><h1>{t.contactTitle}</h1><p>{t.contactText}</p><div className="contact-actions"><a className="button button-primary" href={whatsappUrl(lang === "fr" ? "Bonjour HD VAG PARTS, je souhaite un conseil pour une pièce." : "السلام عليكم HD VAG PARTS، أريد نصيحة حول قطعة.")} onClick={trackWhatsAppClick} target="_blank" rel="noreferrer"><MessageCircle size={18} />{t.openWhatsApp}</a><a className="button button-outline" href={`tel:+${WHATSAPP_NUMBER}`}><Phone size={18} />{t.callUs}</a></div></div><div className="contact-card"><div className="contact-card-top"><span className="status-dot" />{lang === "fr" ? "Canal principal" : "القناة الرئيسية"}</div><div className="contact-icon"><MessageCircle size={40} /></div><h2>WhatsApp</h2><a href={`tel:+${WHATSAPP_NUMBER}`} className="contact-number">{DISPLAY_PHONE}</a><p>{lang === "fr" ? "Envoyez votre VIN, votre modèle et votre wilaya. Nous vous répondons dès que possible." : "أرسل رقم الشاسيه، الموديل والولاية. نجاوبوك في أقرب وقت."}</p><div className="contact-meta"><span><MapPin size={15} />Algérie</span><span><Truck size={15} />Toutes les wilayas</span></div></div></div></section>;
 }
 
 function NotFoundPage({ lang }: { lang: Lang }) { const t = copy[lang]; return <section className="page-section"><div className="container page-intro"><Eyebrow>404</Eyebrow><h1>{lang === "fr" ? "Cette page n’existe pas." : "هذه الصفحة غير موجودة."}</h1><p>{lang === "fr" ? "Retournez à l’accueil ou envoyez-nous un message." : "ارجع للرئيسية أو أرسل لنا رسالة."}</p><Link href="/" className="button button-primary">{t.nav.home}<ArrowLeft size={17} /></Link></div></section>; }
@@ -412,5 +503,5 @@ function NotFoundPage({ lang }: { lang: Lang }) { const t = copy[lang]; return <
 export default function App() {
   const [lang, setLang] = useState<Lang>(() => (localStorage.getItem("hdvag-lang") as Lang) || "fr");
   useEffect(() => localStorage.setItem("hdvag-lang", lang), [lang]);
-  return <Shell lang={lang} setLang={setLang}><Switch><Route path="/" component={() => <Home lang={lang} />} /><Route path="/catalogue" component={() => <Catalog lang={lang} />} /><Route path="/trouver-ma-piece" component={() => <FindPart lang={lang} />} /><Route path="/verifier-compatibilite" component={() => <><section className="page-section compatibility-page-intro"><div className="container page-intro"><Eyebrow>{lang === "fr" ? "VIN · RÉFÉRENCE OEM" : "VIN · مرجع OEM"}</Eyebrow><h1>{copy[lang].compatibilityTitle}</h1><p>{copy[lang].compatibilityText}</p></div></section><CompatibilityTool lang={lang} /></>} /><Route path="/comment-ca-marche" component={() => <HowItWorks lang={lang} />} /><Route path="/livraison-retours" component={() => <Policies lang={lang} />} /><Route path="/contact" component={() => <Contact lang={lang} />} /><Route component={() => <NotFoundPage lang={lang} />} /></Switch></Shell>;
+  return <Shell lang={lang} setLang={setLang}><Switch><Route path="/" component={() => <Home lang={lang} />} /><Route path="/catalogue" component={() => <Catalog lang={lang} />} /><Route path="/trouver-ma-piece" component={() => <FindPart lang={lang} />} /><Route path="/verifier-compatibilite" component={() => <><section className="page-section compatibility-page-intro"><div className="container page-intro"><Eyebrow>{lang === "fr" ? "VIN · RÉFÉRENCE OEM" : "VIN · مرجع OEM"}</Eyebrow><h1>{copy[lang].compatibilityTitle}</h1><p>{copy[lang].compatibilityText}</p></div></section><CompatibilityTool lang={lang} /></>} /><Route path="/comment-ca-marche" component={() => <HowItWorks lang={lang} />} /><Route path="/livraison-retours" component={() => <Policies lang={lang} />} /><Route path="/a-propos" component={() => <About lang={lang} />} /><Route path="/contact" component={() => <Contact lang={lang} />} /><Route component={() => <NotFoundPage lang={lang} />} /></Switch></Shell>;
 }
