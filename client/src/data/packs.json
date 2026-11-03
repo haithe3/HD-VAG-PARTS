@@ -1,0 +1,29 @@
+[
+  {
+    "id": "pack-001",
+    "name": "Pack vidange — PLACEHOLDER",
+    "vehicle": "Volkswagen / Audi / Škoda / SEAT — à préciser",
+    "contents": ["Huile moteur — PLACEHOLDER", "Filtre à huile — PLACEHOLDER", "Joint — PLACEHOLDER"],
+    "price": "Prix sur demande",
+    "quality": "OEM",
+    "placeholder": true
+  },
+  {
+    "id": "pack-002",
+    "name": "Pack freinage — PLACEHOLDER",
+    "vehicle": "Modèle et année à préciser",
+    "contents": ["Plaquettes — PLACEHOLDER", "Disques — PLACEHOLDER", "Accessoires — PLACEHOLDER"],
+    "price": "Prix sur demande",
+    "quality": "Aftermarket",
+    "placeholder": true
+  },
+  {
+    "id": "pack-003",
+    "name": "Pack filtres — PLACEHOLDER",
+    "vehicle": "Moteur à préciser",
+    "contents": ["Filtre à air — PLACEHOLDER", "Filtre habitacle — PLACEHOLDER", "Filtre carburant — PLACEHOLDER"],
+    "price": "Prix sur demande",
+    "quality": "Original",
+    "placeholder": true
+  }
+]

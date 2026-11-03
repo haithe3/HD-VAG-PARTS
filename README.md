@@ -1,6 +1,6 @@
 # HD VAG PARTS
 
-Site mobile-first bilingue (français / العربية RTL) pour HD VAG PARTS, spécialiste des pièces VAG en Algérie. Les commandes sont préparées sur WhatsApp ; il n'y a pas de paiement en ligne.
+Plateforme mobile-first bilingue (français / العربية RTL) pour HD VAG PARTS, spécialiste des pièces VAG en Algérie. Les commandes sont préparées sur WhatsApp ; il n'y a pas de paiement en ligne.
 
 ## Démarrage local
 
@@ -8,70 +8,65 @@ Prérequis : Node.js 20+ et pnpm 10.
 
 ```bash
 pnpm install --frozen-lockfile
-pnpm dev:static
+pnpm db:push
+pnpm tsx scripts/seed-database.ts
+pnpm dev
 ```
 
-Ouvrez ensuite `http://localhost:3000`.
+Ouvrez ensuite `http://localhost:3000`. Le serveur Express sert le frontend, l'API tRPC et les routes OAuth.
 
 Commandes utiles :
 
 ```bash
 pnpm check          # vérification TypeScript
-pnpm build:static   # build Vite dans dist/public
-pnpm test           # tests Vitest disponibles
+pnpm build          # build frontend + serveur
+pnpm build:static   # build frontend statique uniquement
+pnpm db:push        # génère et applique les migrations Drizzle
+pnpm db:migrate     # applique les migrations déjà générées
+pnpm tsx scripts/seed-database.ts  # importe les JSON de départ une seule fois
 ```
 
-Le site est un frontend statique. Pour une publication Netlify ou Vercel, utilisez `pnpm build:static` comme commande de build et `dist/public` comme dossier de sortie.
+## Connexion et rôles
 
-## Mettre à jour les produits
+La connexion utilise Manus OAuth : aucun mot de passe n'est stocké dans le projet. Le lien **Connexion** ouvre `/login`. Après connexion, un client arrive sur `/compte`; l'administrateur arrive sur `/admin`.
 
-Les cartes de démonstration se trouvent dans `client/src/data/products.json`. Remplacez les valeurs `PLACEHOLDER` par vos données réelles, sans modifier la structure JSON :
+Le compte propriétaire de la plateforme est promu `admin` automatiquement par `OWNER_OPEN_ID`. Tous les autres comptes sont créés avec le rôle `user`. Les procédures d'administration tRPC vérifient le rôle côté serveur : masquer le lien `/admin` ne suffit donc pas pour accéder aux opérations.
 
-- `name` : nom de la pièce ;
-- `reference` : référence constructeur ou fournisseur ;
-- `category` : `filters`, `brakes`, `engine`, `suspension`, `electrical`, `fluids` ou `body` ;
-- `quality` : uniquement `Original`, `OEM` ou `Aftermarket` ;
-- `compatible` : modèles compatibles à afficher ;
-- `price` : prix ou `Prix sur demande` ;
-- `description` : note interne/description courte.
+## Tableau de bord administrateur
 
-Après modification, lancez `pnpm check` puis `pnpm build:static`.
+Depuis `/admin`, l'administrateur peut :
 
-## Mettre à jour la compatibilité VIN / référence
+- créer une pièce avec son nom, référence, catégorie, marque, qualité `Original` / `OEM` / `Aftermarket`, compatibilité, prix et disponibilité ;
+- modifier ou supprimer une pièce existante ;
+- rechercher parmi le catalogue importé ;
+- uploader des images JPG, PNG ou WEBP de 8 Mo maximum ; elles sont envoyées vers Manus Managed Storage et leur URL stable est enregistrée dans la base ;
+- consulter les packs d'entretien importés.
 
-L'outil « Vérifier la compatibilité » lit `client/src/data/compatibility.json`. Il contient dix lignes `PLACEHOLDER-001` à `PLACEHOLDER-010` volontairement vides de données réelles. Remplacez-les par vos références vérifiées.
+Les images ne sont pas ajoutées au dépôt Git. Le tableau de bord utilise `product_images` pour conserver l'historique des photos et définit la dernière image uploadée comme image principale.
 
-Chaque ligne possède ces colonnes :
+## Données et migration
 
-```json
-{
-  "reference": "1K0698151",
-  "partName": "Nom de la pièce",
-  "brand": "Volkswagen",
-  "compatibleModels": "Golf 6",
-  "years": "2009-2013",
-  "engineCodes": "CAYC",
-  "price": "Prix sur demande",
-  "quality": "OEM",
-  "inStock": false,
-  "placeholder": false
-}
-```
+Le schéma Drizzle est dans `drizzle/schema.ts` : `users`, `products`, `product_images`, `maintenance_packs`, `compatibility_rows` et `delivery_zones`. Le script `scripts/seed-database.ts` importe les fichiers de départ sans modifier les JSON sources. Il ignore une table déjà remplie pour éviter les doublons.
 
-La recherche ignore les espaces et les tirets dans la référence. Les lignes avec `placeholder: true` sont ignorées pour éviter d'afficher une compatibilité inventée. Le VIN est normalisé en majuscules, les espaces sont ignorés et les lettres `I`, `O` et `Q` sont refusées. Le WMI affiche seulement une marque indicative ; le site ne prétend pas décoder le modèle ou le moteur à partir du VIN seul.
+Les fichiers JSON restent présents comme source de secours pour le mode frontend et comme sauvegarde éditable :
 
-## WhatsApp
+- `client/src/data/products.json` : catalogue initial de 1 447 pièces ;
+- `client/src/data/compatibility.json` : références de compatibilité, avec dix placeholders ;
+- `client/src/data/delivery.json` : 58 wilayas avec prix et délais à confirmer ;
+- `client/src/data/packs.json` : trois packs d'entretien placeholders.
 
-Le numéro configuré dans `client/src/App.tsx` est `0540 39 93 26` au format WhatsApp `213540399326`. Modifiez les deux constantes `WHATSAPP_NUMBER` et `DISPLAY_PHONE` si nécessaire.
+Après la migration, le catalogue public lit d'abord la base de données et revient aux JSON uniquement si la base n'est pas disponible.
 
-## Identité visuelle
+## WhatsApp, SEO et domaine
 
-Le logo fourni par le client est utilisé dans `client/public/brand/hd-vag-parts-user-logo-transparent-cropped.png`. Les autres fichiers éditables sont dans `brand/` et `client/public/brand/`.
+Le numéro WhatsApp est défini dans `client/src/config.ts` et utilisé pour les boutons, le panier et les formulaires. Il n'y a aucun paiement en ligne.
 
-## Sécurité et secrets
+Modifiez `SITE_URL` dans `client/src/config.ts`, puis lancez `pnpm seo:urls`, `pnpm check` et `pnpm build:static` pour régénérer les URLs SEO. Pour Vercel ou Netlify : commande `pnpm build:static`, dossier `dist/public`. Pour la version full-stack, utilisez `pnpm build` et le serveur Docker fourni.
 
-Aucune clé API, aucun token et aucun fichier `.env` ne sont nécessaires pour le frontend statique. Les fichiers `.env*`, logs, caches, dépendances et builds sont exclus par `.gitignore`. Ne commitez jamais de secret : utilisez les variables d'environnement de la plateforme de déploiement si un futur backend en a besoin.
+Pour connecter un domaine : ajoutez-le dans **Project → Settings → Domains** sur Vercel ou dans **Domain management** sur Netlify, puis renseignez le domaine final dans `SITE_URL`.
 
-## Licence
+## Identité visuelle et sécurité
 
-Projet privé HD VAG PARTS. Le dépôt GitHub associé est privé.
+Le logo fourni par le client est utilisé dans `client/public/brand/hd-vag-parts-user-logo-transparent-cropped.png`. Les fichiers éditables sont dans `brand/` et leurs copies servies dans `client/public/brand/`.
+
+Ne jamais committer de secrets, tokens ou clés API. Les fichiers `.env*`, logs, caches, dépendances et builds sont exclus par `.gitignore`. Les identifiants analytics restent vides par défaut.

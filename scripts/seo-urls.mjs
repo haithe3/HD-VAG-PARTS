@@ -1,0 +1,20 @@
+import fs from "node:fs";
+import path from "node:path";
+
+const root = process.cwd();
+const config = fs.readFileSync(path.join(root, "client/src/config.ts"), "utf8");
+const siteUrl = (config.match(/SITE_URL\s*=\s*["'`]([^"'`]*)["'`]/)?.[1] || "").replace(/\/$/, "");
+const routes = JSON.parse(fs.readFileSync(path.join(root, "client/public/manus-routes.json"), "utf8")).routes.filter((route) => route.path !== "/404");
+const absolute = (value) => siteUrl ? `${siteUrl}${value}` : value;
+const sitemap = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${routes.map((route) => `  <url><loc>${absolute(route.path)}</loc></url>`).join("\n")}\n</urlset>\n`;
+fs.writeFileSync(path.join(root, "client/public/sitemap.xml"), sitemap);
+fs.writeFileSync(path.join(root, "client/public/robots.txt"), `User-agent: *\nAllow: /\nDisallow: /api/\nSitemap: ${absolute("/sitemap.xml")}\n`);
+const indexPath = path.join(root, "client/index.html");
+let index = fs.readFileSync(indexPath, "utf8");
+const image = absolute("/brand/hd-vag-parts-user-logo-transparent-cropped.png");
+index = index.replace(/(<meta property="og:image" content=")[^"]*(" \/>)/, `$1${image}$2`);
+index = index.replace(/(<meta name="twitter:image" content=")[^"]*(" \/>)/, `$1${image}$2`);
+index = index.replace(/(<link rel="canonical" href=")[^"]*(" \/>)/, `$1${absolute("/")}$2`);
+if (siteUrl && !index.includes('rel="canonical"')) index = index.replace("</head>", `    <link rel="canonical" href="${absolute("/")}" />\n  </head>`);
+fs.writeFileSync(indexPath, index);
+console.log(`SEO URLs generated with SITE_URL=${siteUrl || "(relative)"}`);
