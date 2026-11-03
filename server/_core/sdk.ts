@@ -317,6 +317,14 @@ class SDKServer {
       throw ForbiddenError("User not found");
     }
 
+    // Re-check the owner against the live database user on every request.
+    // This repairs users promoted after their original OAuth session while
+    // keeping every non-owner account on the default role.
+    if (ENV.ownerOpenId && user.openId === ENV.ownerOpenId && user.role !== "admin") {
+      const promoted = await db.promoteUserToAdmin(user.openId);
+      if (promoted) user = promoted;
+    }
+
     await db.upsertUser({
       openId: user.openId,
       lastSignedIn: signedInAt,

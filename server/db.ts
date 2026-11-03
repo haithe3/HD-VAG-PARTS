@@ -62,6 +62,13 @@ export async function getUserByOpenId(openId: string) {
   return result[0];
 }
 
+export async function promoteUserToAdmin(openId: string) {
+  const db = await getDb();
+  if (!db) throw new Error("Database is not available");
+  await db.update(users).set({ role: "admin" }).where(eq(users.openId, openId));
+  return getUserByOpenId(openId);
+}
+
 export async function listProducts() {
   const db = await getDb();
   if (!db) return [];

@@ -17,6 +17,7 @@ const text = {
     admin: "Administration",
     customer: "Espace client",
     signedInAs: "Connecté avec",
+    roleLabel: "Rôle",
     logout: "Se déconnecter",
     backShop: "Retour à la boutique",
     adminTitle: "Atelier de gestion",
@@ -58,6 +59,7 @@ const text = {
     admin: "لوحة الإدارة",
     customer: "مساحة الزبون",
     signedInAs: "داخل بالحساب",
+    roleLabel: "الدور",
     logout: "تسجيل الخروج",
     backShop: "الرجوع للمحل",
     adminTitle: "ورشة التسيير",
@@ -104,7 +106,7 @@ function AuthCard({ lang, mode = "login" }: { lang: Lang; mode?: "login" | "acco
   }, [loading, mode, navigate, user]);
   if (loading) return <section className="account-page"><div className="container account-card"><div className="admin-loading">...</div></div></section>;
   if (!user) return <section className="account-page"><div className="container account-card"><div className="account-icon"><LogIn size={24} /></div><h1>{t.loginTitle}</h1><p>{t.loginText}</p><button className="button button-primary" onClick={() => startLogin()}><LogIn size={17} />{t.login}</button><Link href="/" className="account-back">{t.backShop}</Link></div></section>;
-  return <section className="account-page"><div className="container account-card"><div className="account-icon"><ShieldCheck size={24} /></div><span className="account-kicker">{user.role === "admin" ? t.admin : t.customer}</span><h1>{t.account}</h1><p>{t.signedInAs} <strong>{user.name || user.email || user.openId}</strong>.</p><div className="account-actions">{user.role === "admin" && <Link href="/admin" className="button button-primary"><Package size={17} />{t.admin}</Link>}<button className="button button-outline" onClick={async () => { await logout(); navigate("/"); }}><LogOut size={17} />{t.logout}</button></div><Link href="/" className="account-back">{t.backShop}</Link></div></section>;
+  return <section className="account-page"><div className="container account-card"><div className="account-icon"><ShieldCheck size={24} /></div><span className="account-kicker">{user.role === "admin" ? t.admin : t.customer}</span><h1>{t.account}</h1><p>{t.signedInAs} <strong>{user.name || user.email || user.openId}</strong>.</p><p className="account-role">{t.roleLabel} : <strong>{user.role}</strong></p><div className="account-actions">{user.role === "admin" && <Link href="/admin" className="button button-primary"><Package size={17} />{t.admin}</Link>}<button className="button button-outline" onClick={async () => { await logout(); navigate("/"); }}><LogOut size={17} />{t.logout}</button></div><Link href="/" className="account-back">{t.backShop}</Link></div></section>;
 }
 
 function ProductEditor({ lang, product, onClose }: { lang: Lang; product?: ProductRecord; onClose: () => void }) {
