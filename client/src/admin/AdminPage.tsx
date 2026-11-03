@@ -100,7 +100,12 @@ const categories = ["engine", "suspension", "cooling", "electrical", "brakes", "
 function AuthCard({ lang, mode = "login" }: { lang: Lang; mode?: "login" | "account" }) {
   const t = text[lang];
   const { user, loading, logout } = useAuth();
+  const utils = trpc.useUtils();
+  const bootstrap = trpc.auth.bootstrapAdmin.useMutation({ onSuccess: (nextUser) => utils.auth.me.setData(undefined, nextUser ?? null) });
   const [, navigate] = useLocation();
+  useEffect(() => {
+    if (!loading && user?.role === "user" && !bootstrap.isPending && !bootstrap.isSuccess) bootstrap.mutate();
+  }, [bootstrap, loading, user?.role]);
   useEffect(() => {
     if (!loading && user && mode === "login") navigate(user.role === "admin" ? "/admin" : "/compte");
   }, [loading, mode, navigate, user]);

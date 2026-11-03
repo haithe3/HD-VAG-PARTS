@@ -69,6 +69,15 @@ export async function promoteUserToAdmin(openId: string) {
   return getUserByOpenId(openId);
 }
 
+export async function bootstrapSoleUserAsAdmin(openId: string) {
+  const db = await getDb();
+  if (!db) throw new Error("Database is not available");
+  const rows = await db.select({ openId: users.openId, role: users.role }).from(users);
+  const canBootstrap = rows.length === 1 && rows[0]?.openId === openId && !rows.some((row) => row.role === "admin");
+  if (canBootstrap) await db.update(users).set({ role: "admin" }).where(eq(users.openId, openId));
+  return getUserByOpenId(openId);
+}
+
 export async function listProducts() {
   const db = await getDb();
   if (!db) return [];
